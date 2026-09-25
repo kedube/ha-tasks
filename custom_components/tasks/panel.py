@@ -24,7 +24,7 @@ _LOGGER = logging.getLogger(__name__)
 
 async def async_register_panel(hass: HomeAssistant, entry: ConfigEntry) -> None:
     """Register custom panel for Tasks."""
-    static_path = os.path.join(os.path.dirname(__file__), "panel", "dist")  # noqa: PTH118, PTH120
+    static_path = os.path.join(os.path.dirname(__file__), "panel", "dist")
 
     # Register static path only once, since it cannot be removed on unload
     if not hass.data.setdefault("tasks_static_path_registered", False):

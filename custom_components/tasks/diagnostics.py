@@ -20,7 +20,7 @@ TO_REDACT = {"description", "note", "notification_url", "tag_id"}
 
 
 async def async_get_config_entry_diagnostics(
-    hass: HomeAssistant,  # noqa: ARG001
+    hass: HomeAssistant,
     entry: TasksConfigEntry,
 ) -> dict[str, Any]:
     """Return diagnostics for the config entry."""

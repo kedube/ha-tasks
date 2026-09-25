@@ -41,7 +41,7 @@ def parse_notification_time(value: str | None) -> tuple[int, int]:
     """Parse an HH:MM[:SS] time selector value, defaulting to 09:00."""
     if value:
         parts = value.split(":")
-        if len(parts) >= 2:  # noqa: PLR2004
+        if len(parts) >= 2:
             try:
                 return (int(parts[0]), int(parts[1]))
             except ValueError:
