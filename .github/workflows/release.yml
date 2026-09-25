@@ -1,0 +1,151 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: "Version bump: minor = +0.1 (0.9 -> 1.0), major = next whole version, none = re-release the current version"
+        required: true
+        default: "none"
+        type: choice
+        options:
+          - none
+          - minor
+          - major
+  workflow_run:
+    workflows:
+      - CI
+    types:
+      - completed
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-main
+  cancel-in-progress: true
+
+jobs:
+  release:
+    name: Bump version and publish release
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (
+        github.event.workflow_run.conclusion == 'success' &&
+        github.event.workflow_run.event == 'push' &&
+        github.event.workflow_run.head_branch == 'main'
+      )
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out main
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          fetch-depth: 0
+          ref: main
+
+      - name: Skip stale workflow runs
+        id: head_check
+        env:
+          EXPECTED_SHA: ${{ github.event.workflow_run.head_sha }}
+          EVENT_NAME: ${{ github.event_name }}
+          BUMP_INPUT: ${{ inputs.bump || 'none' }}
+        run: |
+          current_sha="$(git rev-parse origin/main)"
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            if [ "$BUMP_INPUT" = "none" ]; then
+              echo "release_action=existing" >> "$GITHUB_OUTPUT"
+            else
+              echo "release_action=bump" >> "$GITHUB_OUTPUT"
+            fi
+            echo "release_target=$current_sha" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if [ "$current_sha" = "$EXPECTED_SHA" ]; then
+            echo "release_action=bump" >> "$GITHUB_OUTPUT"
+            echo "release_target=$current_sha" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          previous_sha="$(git rev-parse "$current_sha^")"
+          latest_subject="$(git log -1 --format=%s "$current_sha")"
+          if [ "$previous_sha" = "$EXPECTED_SHA" ] && [[ "$latest_subject" == chore\(release\):*\ \[skip\ ci\] ]]; then
+            echo "release_action=existing" >> "$GITHUB_OUTPUT"
+            echo "release_target=$current_sha" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "Skipping stale run for $EXPECTED_SHA because main is already at $current_sha."
+          echo "release_action=skip" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Python
+        if: steps.head_check.outputs.release_action != 'skip'
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: "3.14"
+
+      # Versions are X.Y: each automatic release adds 0.1, rolling over to
+      # the next major after .9 (0.9 -> 1.0). Tags and release names are the
+      # bare version, with no "v" prefix.
+      - name: Bump version and rotate changelog
+        if: steps.head_check.outputs.release_action == 'bump'
+        id: bump
+        env:
+          BUMP_TYPE: ${{ inputs.bump || 'minor' }}
+        run: |
+          new_version="$(python .github/scripts/bump_version.py --bump "$BUMP_TYPE")"
+          python .github/scripts/update_changelog.py "$new_version"
+          echo "new_version=$new_version" >> "$GITHUB_OUTPUT"
+
+      - name: Read existing version
+        if: steps.head_check.outputs.release_action == 'existing'
+        id: current_version
+        run: |
+          new_version="$(python .github/scripts/bump_version.py --print-current)"
+          echo "new_version=$new_version" >> "$GITHUB_OUTPUT"
+
+      - name: Commit release version
+        if: steps.head_check.outputs.release_action == 'bump'
+        id: commit_release
+        env:
+          NEW_VERSION: ${{ steps.bump.outputs.new_version }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add custom_components/tasks/const.py custom_components/tasks/manifest.json CHANGELOG.md
+          git commit -m "chore(release): $NEW_VERSION [skip ci]"
+          echo "release_target=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Push release commit
+        if: steps.head_check.outputs.release_action == 'bump'
+        run: git push origin HEAD:main
+
+      # GitHub's auto-generated notes only list merged PRs, so direct-to-main
+      # releases came out empty. Build the body ourselves: Highlights from
+      # CHANGELOG.md (rotated from its Unreleased section during the bump) plus
+      # the commit list since the previous tag.
+      - name: Generate release notes
+        if: steps.head_check.outputs.release_action != 'skip'
+        env:
+          NEW_VERSION: ${{ steps.bump.outputs.new_version || steps.current_version.outputs.new_version }}
+        run: python .github/scripts/generate_release_notes.py "$NEW_VERSION" release_notes.md
+
+      # HACS installs from the zip asset (hacs.json zip_release/filename).
+      # manifest.json already carries the released version — the bump script
+      # updates it together with const.py.
+      - name: Build HACS zip
+        if: steps.head_check.outputs.release_action != 'skip'
+        run: |
+          cd custom_components/tasks/
+          zip ../../tasks.zip ./* translations/* brand/* panel/dist/* -x '.*'
+
+      - name: Create GitHub release
+        if: steps.head_check.outputs.release_action != 'skip'
+        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2
+        with:
+          tag_name: ${{ steps.bump.outputs.new_version || steps.current_version.outputs.new_version }}
+          target_commitish: ${{ steps.commit_release.outputs.release_target || steps.head_check.outputs.release_target }}
+          name: ${{ steps.bump.outputs.new_version || steps.current_version.outputs.new_version }}
+          body_path: release_notes.md
+          files: tasks.zip

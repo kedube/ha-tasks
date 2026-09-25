@@ -1,0 +1,211 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 6 * * 1"
+
+permissions: {}
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  hacs:
+    name: HACS
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+
+      - name: HACS validation
+        uses: hacs/action@1ebf01c408f29afcb6406bd431bc98fd8cbb15aa
+        with:
+          category: integration
+
+  hassfest:
+    name: Hassfest
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+
+      - name: Run hassfest
+        uses: home-assistant/actions/hassfest@f4ca6f671bd429efb108c0f2fa0ae8af0215986c
+
+  ruff:
+    name: Ruff
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: "3.14"
+          cache: pip
+
+      # Install only the ruff pin from requirements.txt; the full file pulls in
+      # homeassistant, which the lint job does not need.
+      - name: Install ruff
+        run: pip install "$(grep -Ei '^ruff' requirements.txt)"
+
+      - name: Run Ruff lint
+        run: python -m ruff check .
+
+      - name: Run Ruff format check
+        run: python -m ruff format --check .
+
+  pytest:
+    name: Pytest (${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.13", "3.14"]
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+          cache-dependency-path: requirements_test.txt
+
+      - name: Install test dependencies
+        run: pip install -r requirements_test.txt
+
+      - name: Run tests
+        run: python -m pytest -q
+
+  # Early warning: run the suite against the newest Home Assistant (including
+  # pre-releases) so upstream breaking changes surface before users hit them.
+  # Scheduled-only and non-blocking — a red run here is a heads-up, not a gate.
+  ha-next:
+    name: HA next (early warning)
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    continue-on-error: true
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: "3.13"
+
+      - name: Install test dependencies
+        run: pip install -r requirements_test.txt
+
+      - name: Upgrade to latest Home Assistant
+        run: pip install --upgrade --pre homeassistant home-assistant-frontend
+
+      - name: Show versions
+        run: pip show homeassistant home-assistant-frontend | grep -E '^(Name|Version)'
+
+      - name: Run tests against HA next
+        run: python -m pytest -q
+
+      - name: Install playwright
+        run: |
+          pip install playwright
+          python -m playwright install --with-deps chromium
+
+      - name: Browser smoke test against HA next
+        run: python scripts/e2e_smoke.py --install-deps
+
+  # The only check that exercises the real frontend: boots HA, logs in with
+  # a browser, adds a task, and creates a group. Catches component removals
+  # and rendering regressions that pytest structurally cannot see.
+  smoke:
+    name: Browser smoke test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: "3.13"
+          cache: pip
+
+      - name: Install Home Assistant and playwright
+        run: pip install homeassistant colorlog playwright
+
+      - name: Install chromium
+        run: python -m playwright install --with-deps chromium
+
+      # --install-deps adds the manifest-pinned requirements the frontend
+      # needs on a bare pip install (hass_frontend, hassil, numpy, ...).
+      - name: Run browser smoke test
+        run: python scripts/e2e_smoke.py --install-deps
+
+      - name: Upload panel screenshot
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: smoke-panel-screenshot
+          path: /tmp/hm_smoke_panel.png
+          if-no-files-found: ignore
+
+  frontend:
+    name: Panel build
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: custom_components/tasks/panel
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+
+      - name: Set up Node
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: custom_components/tasks/panel/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Home Assistant is removing its legacy (Material Web Components era)
+      # elements release by release; each removal silently blanks whatever
+      # still renders one (mwc-button in #122, ha-textfield in 1.5.16).
+      # Keep them out of the sources for good.
+      - name: Forbid legacy HA components
+        run: |
+          if grep -rnE '<(mwc-[a-z-]+|ha-textfield|ha-formfield|paper-[a-z-]+|ha-md-[a-z-]+)' src/; then
+            echo "::error::Legacy Home Assistant components found (see above). Use ha-selector / ha-form / ha-button instead."
+            exit 1
+          fi
+
+      - name: Type check
+        run: npx tsc --noEmit
+
+      - name: Unit tests
+        run: npm test
+
+      - name: Build bundle
+        run: npm run build
+
+      # The bundle is committed for HACS; fail if it drifts from the sources.
+      - name: Verify committed bundle is current
+        run: git diff --exit-code -- dist/

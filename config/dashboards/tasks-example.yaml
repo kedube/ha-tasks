@@ -1,0 +1,61 @@
+# Example dashboard for the Tasks integration, loaded by the
+# development environment (scripts/develop) via configuration.yaml.
+# Documented copy: docs/example-dashboard.md — keep the two in sync.
+views:
+  - title: Tasks
+    path: tasks
+    icon: mdi:checkbox-marked-circle-auto-outline
+    type: sections
+    max_columns: 3
+    sections:
+      # ── What's due: check tasks off right here ────────────────────────
+      - type: grid
+        cards:
+          - type: heading
+            heading: Due now
+            icon: mdi:clipboard-text-clock-outline
+          - type: todo-list
+            entity: todo.tasks
+            hide_completed: true
+            display_order: duedate_asc
+
+      # ── At a glance ───────────────────────────────────────────────────
+      - type: grid
+        cards:
+          - type: heading
+            heading: At a glance
+            icon: mdi:clipboard-check-outline
+          - type: markdown
+            content: |-
+              {% set tasks = states.binary_sensor
+                 | selectattr('attributes.trigger_type', 'defined') | list %}
+              {% set due = tasks | selectattr('state', 'eq', 'on') | list %}
+              {% if due %}
+              ⚠️ **{{ due | count }} of {{ tasks | count }} tasks due**
+
+              {% for t in due %}
+              - {{ t.name }}
+              {% endfor %}
+              {% else %}
+              ✅ All {{ tasks | count }} tasks are up to date.
+              {% endif %}
+
+      # ── Coming up: projected due dates ────────────────────────────────
+      - type: grid
+        cards:
+          - type: heading
+            heading: Coming up
+            icon: mdi:calendar-clock
+          - type: calendar
+            entities:
+              - calendar.tasks
+            initial_view: listWeek
+
+      # ── Create tasks without opening the panel ────────────────────────
+      - type: grid
+        cards:
+          - type: heading
+            heading: New task
+            icon: mdi:plus-circle-outline
+          - type: custom:tasks-add-task-card
+            title: Add Task

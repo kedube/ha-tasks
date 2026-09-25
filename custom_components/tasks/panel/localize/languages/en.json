@@ -1,0 +1,375 @@
+{
+    "common": {
+        "loading": "Loading...",
+        "none": "None",
+        "no_tasks": "No tasks found.",
+        "ungrouped": "Ungrouped",
+        "cancel": "Cancel",
+        "invalid_date": "Invalid date entered."
+    },
+    "intervals": {
+        "day": "Day",
+        "days": "Days",
+        "week": "Week",
+        "weeks": "Weeks",
+        "month": "Month",
+        "months": "Months",
+        "year": "Year",
+        "years": "Years",
+        "every_uses": "Every {value} uses",
+        "every_runtime": "Every {value} runtime"
+    },
+    "trigger_types": {
+        "time": "Time-based",
+        "date": "Fixed date",
+        "count": "Count-based",
+        "runtime": "Runtime-based"
+    },
+    "notifications": {
+        "when": {
+            "due": "Due",
+            "overdue": "Overdue",
+            "due_and_overdue": "Due and overdue"
+        }
+    },
+    "card": {
+        "add_task": {
+            "added": "\"{title}\" added.",
+            "admin_only": "Only administrators can add tasks."
+        }
+    },
+    "panel": {
+        "cards": {
+            "new": {
+                "title": "Create New Task",
+                "fields": {
+                    "title": {
+                        "heading": "Task Title"
+                    },
+                    "interval_value": {
+                        "heading": "Interval"
+                    },
+                    "interval_type": {
+                        "heading": "Interval Type"
+                    },
+                    "last_performed": {
+                        "heading": "Last Performed",
+                        "helper": "Leave blank to use today"
+                    },
+                    "anchor_date": {
+                        "heading": "Anchor date",
+                        "helper": "The schedule repeats from this fixed date"
+                    },
+                    "tag": {
+                        "heading": "Tag"
+                    },
+                    "icon": {
+                        "heading": "Icon"
+                    },
+                    "label": {
+                        "heading": "Label(s)"
+                    },
+                    "area": {
+                        "heading": "Area"
+                    },
+                    "description": {
+                        "heading": "Description"
+                    },
+                    "trigger_type": {
+                        "heading": "Trigger type"
+                    },
+                    "count_entity_id": {
+                        "heading": "Counted entity"
+                    },
+                    "count_threshold": {
+                        "heading": "Count threshold"
+                    },
+                    "runtime_entity_id": {
+                        "heading": "Runtime sensor"
+                    },
+                    "runtime_threshold": {
+                        "heading": "Runtime threshold"
+                    },
+                    "group_id": {
+                        "heading": "Group",
+                        "helper": "Pick a group or type a new name"
+                    },
+                    "notifications_enabled": {
+                        "heading": "Enable notifications"
+                    },
+                    "notification_target": {
+                        "heading": "Notify service",
+                        "helper": "Leave empty to use notify.notify"
+                    },
+                    "notify_when": {
+                        "heading": "Notify when"
+                    },
+                    "notify_days_before_due": {
+                        "heading": "Days before due",
+                        "helper": "Optional due-soon reminder offset"
+                    },
+                    "notification_time": {
+                        "heading": "Time of day",
+                        "helper": "When automatic notifications are sent"
+                    },
+                    "notification_url": {
+                        "heading": "Open URL",
+                        "helper": "Optional URL for the notification's Open action"
+                    },
+                    "active_months": {
+                        "heading": "Active months",
+                        "helper": "Seasonal tasks are only due in these months (empty = year-round)"
+                    }
+                },
+                "sections": {
+                    "optional": "Optional settings",
+                    "notifications": "Notifications"
+                },
+                "actions": {
+                    "add_task": "Add Task"
+                },
+                "alerts": {
+                    "required": "Please fill all fields",
+                    "error": "Error adding task. See console for details."
+                }
+            },
+            "current": {
+                "next": "Next Due",
+                "actions": {
+                    "edit": "Edit",
+                    "move": "Move to group",
+                    "remove": "Remove"
+                },
+                "alerts": {
+                    "complete_success": "\"{title}\" marked complete. The next due date was recalculated.",
+                    "complete_error": "Failed to mark task complete. See console for details.",
+                    "remove_error": "Failed to remove the task. See console for details."
+                },
+                "filter": {
+                    "search": "Search tasks...",
+                    "templates": "Browse templates",
+                    "export": "Export CSV",
+                    "clear": "Clear filters"
+                }
+            },
+            "groups": {
+                "title": "Groups",
+                "fields": {
+                    "new_group": {
+                        "heading": "New group"
+                    }
+                },
+                "actions": {
+                    "create": "Create",
+                    "rename": "Rename",
+                    "delete": "Delete",
+                    "save": "Save"
+                },
+                "empty": "No groups yet. Create one to organize your tasks.",
+                "confirm_delete": "Delete group \"{title}\"? Its tasks move to Ungrouped.",
+                "alerts": {
+                    "error": "Failed to create the group. Check the browser console and Home Assistant logs.",
+                    "exists": "Group \"{title}\" already exists.",
+                    "rename_error": "Failed to rename the group. See console for details.",
+                    "delete_error": "Failed to delete the group. See console for details."
+                },
+                "confirm_delete_title": "Delete Group"
+            }
+        },
+        "dialog": {
+            "edit_task": {
+                "title": "Edit Task",
+                "fields": {
+                    "interval_value": {
+                        "heading": "Interval"
+                    },
+                    "interval_type": {
+                        "heading": "Interval Type"
+                    },
+                    "last_performed": {
+                        "heading": "Last Performed",
+                        "helper": "Leave blank to use today"
+                    },
+                    "anchor_date": {
+                        "heading": "Anchor date",
+                        "helper": "The schedule repeats from this fixed date"
+                    },
+                    "tag": {
+                        "heading": "Tag"
+                    },
+                    "icon": {
+                        "heading": "Icon"
+                    },
+                    "label": {
+                        "heading": "Label(s)"
+                    },
+                    "area": {
+                        "heading": "Area"
+                    },
+                    "trigger_type": {
+                        "heading": "Trigger type"
+                    },
+                    "count_entity_id": {
+                        "heading": "Counted entity"
+                    },
+                    "count_threshold": {
+                        "heading": "Count threshold"
+                    },
+                    "runtime_entity_id": {
+                        "heading": "Runtime sensor"
+                    },
+                    "runtime_threshold": {
+                        "heading": "Runtime threshold"
+                    },
+                    "title": {
+                        "heading": "Title"
+                    },
+                    "description": {
+                        "heading": "Description"
+                    },
+                    "group_id": {
+                        "heading": "Group",
+                        "helper": "Pick a group or type a new name"
+                    },
+                    "notifications_enabled": {
+                        "heading": "Enable notifications"
+                    },
+                    "notification_target": {
+                        "heading": "Notify service",
+                        "helper": "Leave empty to use notify.notify"
+                    },
+                    "notify_when": {
+                        "heading": "Notify when"
+                    },
+                    "notify_days_before_due": {
+                        "heading": "Days before due",
+                        "helper": "Optional due-soon reminder offset"
+                    },
+                    "notification_time": {
+                        "heading": "Time of day",
+                        "helper": "When automatic notifications are sent"
+                    },
+                    "notification_url": {
+                        "heading": "Open URL",
+                        "helper": "Optional URL for the notification's Open action"
+                    },
+                    "active_months": {
+                        "heading": "Active months",
+                        "helper": "Seasonal tasks are only due in these months (empty = year-round)"
+                    }
+                },
+                "sections": {
+                    "optional": "Optional settings",
+                    "notifications": "Notifications",
+                    "history": "History"
+                },
+                "actions": {
+                    "cancel": "Cancel",
+                    "save": "Save",
+                    "test_notification": "Send test notification"
+                },
+                "alerts": {
+                    "error": "Failed to save changes. See console for details.",
+                    "test_error": "Failed to send the test notification. See console for details."
+                }
+            },
+            "move_task": {
+                "title": "Move task",
+                "fields": {
+                    "group_id": {
+                        "heading": "Group"
+                    }
+                },
+                "actions": {
+                    "cancel": "Cancel",
+                    "move": "Move"
+                }
+            },
+            "confirm_complete": {
+                "title": "Mark Task Complete",
+                "message": "Mark \"{title}\" as complete? Last performed will be reset to today and the next due date will be recalculated based on the {interval} interval.",
+                "message_progress": "Mark \"{title}\" as complete? Progress ({interval}) will start over.",
+                "note_label": "Note (optional)",
+                "actions": {
+                    "confirm": "Mark Complete"
+                }
+            },
+            "confirm_remove": {
+                "title": "Remove Task",
+                "message": "Remove \"{title}\"? This cannot be undone.",
+                "actions": {
+                    "confirm": "Remove"
+                }
+            },
+            "templates": {
+                "title": "Task Templates",
+                "search": "Search templates...",
+                "import_csv": "Import from CSV",
+                "choose_csv": "Choose CSV file",
+                "csv_hint": "Columns: title (required), description, interval_value, interval_type, last_performed (YYYY-MM-DD), icon, group_id",
+                "csv_empty": "No importable rows found in the file.",
+                "no_matches": "No templates match your search.",
+                "import_count": "{count, plural, one {Import 1 task} other {Import # tasks}}",
+                "imported": "{count, plural, one {1 task imported.} other {# tasks imported.}}",
+                "import_failed": "Failed to import: {titles}",
+                "preview": {
+                    "title": "Title",
+                    "interval": "Interval",
+                    "last_performed": "Last performed",
+                    "group": "Group"
+                }
+            }
+        },
+        "toolbar": {
+            "add_task": "Add task",
+            "manage_groups": "Manage groups"
+        },
+        "nav": {
+            "all_tasks": "All tasks",
+            "done_editing": "Done"
+        },
+        "list": {
+            "due_today": "Due today",
+            "days_overdue": "{count, plural, one {1 day overdue} other {# days overdue}}",
+            "days_left": "{count, plural, one {Due in 1 day} other {# days left}}",
+            "search": "Search tasks...",
+            "all_groups": "All groups",
+            "overdue": "Overdue",
+            "due_soon": "Due soon",
+            "upcoming": "Upcoming",
+            "no_tasks": "No tasks found",
+            "done": "Done",
+            "last_performed": "Last Performed",
+            "progress": "Progress",
+            "history": "History",
+            "complete": "Complete",
+            "remove": "Remove",
+            "all_caught_up": "All caught up",
+            "needs_attention": "{count, plural, one {1 task needs attention} other {# tasks need attention}}",
+            "done_today": "Done today",
+            "repeats": "Repeats",
+            "next_due": "Next due {date}",
+            "clear_search": "Clear search",
+            "group_by": "Group by",
+            "by_status": "Status"
+        },
+        "empty": {
+            "title": "No tasks yet",
+            "message": "Add your first task, or start from the template library of common household tasks.",
+            "message_readonly": "Tasks added by an administrator will show up here."
+        }
+    },
+    "templates": {
+        "categories": {
+            "hvac": "HVAC",
+            "plumbing": "Plumbing",
+            "electrical": "Electrical",
+            "appliances": "Appliances",
+            "interior": "Interior",
+            "exterior": "Exterior",
+            "yard": "Yard & garden",
+            "safety": "Safety",
+            "vehicles": "Vehicles"
+        }
+    }
+}

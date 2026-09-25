@@ -1,0 +1,375 @@
+{
+    "common": {
+        "loading": "Caricamento...",
+        "none": "Nessuno",
+        "no_tasks": "Nessuna attività trovata.",
+        "ungrouped": "Senza gruppo",
+        "cancel": "Annulla",
+        "invalid_date": "Data inserita non valida."
+    },
+    "intervals": {
+        "day": "Giorno",
+        "days": "Giorni",
+        "week": "Settimana",
+        "weeks": "Settimane",
+        "month": "Mese",
+        "months": "Mesi",
+        "year": "Anno",
+        "years": "Anni",
+        "every_uses": "Ogni {value} utilizzi",
+        "every_runtime": "Ogni {value} di funzionamento"
+    },
+    "trigger_types": {
+        "time": "Basato sul tempo",
+        "date": "Data fissa",
+        "count": "Basato sul conteggio",
+        "runtime": "Basato sul tempo di funzionamento"
+    },
+    "notifications": {
+        "when": {
+            "due": "In scadenza",
+            "overdue": "Scadute",
+            "due_and_overdue": "In scadenza e scadute"
+        }
+    },
+    "card": {
+        "add_task": {
+            "added": "\"{title}\" aggiunta.",
+            "admin_only": "Solo gli amministratori possono aggiungere attività."
+        }
+    },
+    "panel": {
+        "cards": {
+            "new": {
+                "title": "Crea nuova attività",
+                "fields": {
+                    "title": {
+                        "heading": "Titolo attività"
+                    },
+                    "interval_value": {
+                        "heading": "Intervallo"
+                    },
+                    "interval_type": {
+                        "heading": "Tipo di intervallo"
+                    },
+                    "last_performed": {
+                        "heading": "Ultima esecuzione",
+                        "helper": "Lascia vuoto per usare oggi"
+                    },
+                    "anchor_date": {
+                        "heading": "Data di riferimento",
+                        "helper": "La pianificazione si ripete a partire da questa data fissa"
+                    },
+                    "tag": {
+                        "heading": "Tag"
+                    },
+                    "icon": {
+                        "heading": "Icona"
+                    },
+                    "label": {
+                        "heading": "Etichetta/e"
+                    },
+                    "area": {
+                        "heading": "Area"
+                    },
+                    "description": {
+                        "heading": "Descrizione"
+                    },
+                    "trigger_type": {
+                        "heading": "Tipo di attivazione"
+                    },
+                    "count_entity_id": {
+                        "heading": "Entità conteggiata"
+                    },
+                    "count_threshold": {
+                        "heading": "Soglia di conteggio"
+                    },
+                    "runtime_entity_id": {
+                        "heading": "Sensore tempo di funzionamento"
+                    },
+                    "runtime_threshold": {
+                        "heading": "Soglia tempo di funzionamento"
+                    },
+                    "group_id": {
+                        "heading": "Gruppo",
+                        "helper": "Scegli un gruppo o digita un nuovo nome"
+                    },
+                    "notifications_enabled": {
+                        "heading": "Abilita notifiche"
+                    },
+                    "notification_target": {
+                        "heading": "Servizio di notifica",
+                        "helper": "Lascia vuoto per usare notify.notify"
+                    },
+                    "notify_when": {
+                        "heading": "Notifica quando"
+                    },
+                    "notify_days_before_due": {
+                        "heading": "Giorni prima della scadenza",
+                        "helper": "Anticipo facoltativo per il promemoria di scadenza imminente"
+                    },
+                    "notification_time": {
+                        "heading": "Ora del giorno",
+                        "helper": "Quando vengono inviate le notifiche automatiche"
+                    },
+                    "notification_url": {
+                        "heading": "URL da aprire",
+                        "helper": "URL facoltativo per l'azione Apri della notifica"
+                    },
+                    "active_months": {
+                        "heading": "Mesi attivi",
+                        "helper": "Le attività stagionali scadono solo in questi mesi (vuoto = tutto l'anno)"
+                    }
+                },
+                "sections": {
+                    "optional": "Impostazioni facoltative",
+                    "notifications": "Notifiche"
+                },
+                "actions": {
+                    "add_task": "Aggiungi attività"
+                },
+                "alerts": {
+                    "required": "Compila tutti i campi",
+                    "error": "Errore durante l'aggiunta dell'attività. Vedi la console per i dettagli."
+                }
+            },
+            "current": {
+                "next": "Prossima scadenza",
+                "actions": {
+                    "edit": "Modifica",
+                    "move": "Sposta nel gruppo",
+                    "remove": "Rimuovi"
+                },
+                "alerts": {
+                    "complete_success": "\"{title}\" contrassegnata come completata. La prossima scadenza è stata ricalcolata.",
+                    "complete_error": "Impossibile contrassegnare l'attività come completata. Vedi la console per i dettagli.",
+                    "remove_error": "Impossibile rimuovere l'attività. Vedi la console per i dettagli."
+                },
+                "filter": {
+                    "search": "Cerca attività...",
+                    "templates": "Sfoglia modelli",
+                    "export": "Esporta CSV",
+                    "clear": "Cancella filtri"
+                }
+            },
+            "groups": {
+                "title": "Gruppi",
+                "fields": {
+                    "new_group": {
+                        "heading": "Nuovo gruppo"
+                    }
+                },
+                "actions": {
+                    "create": "Crea",
+                    "rename": "Rinomina",
+                    "delete": "Elimina",
+                    "save": "Salva"
+                },
+                "empty": "Nessun gruppo ancora. Creane uno per organizzare le tue attività.",
+                "confirm_delete": "Eliminare il gruppo \"{title}\"? Le sue attività passeranno a Senza gruppo.",
+                "alerts": {
+                    "error": "Impossibile creare il gruppo. Controlla la console del browser e i log di Home Assistant.",
+                    "exists": "Il gruppo \"{title}\" esiste già.",
+                    "rename_error": "Impossibile rinominare il gruppo. Vedi la console per i dettagli.",
+                    "delete_error": "Impossibile eliminare il gruppo. Vedi la console per i dettagli."
+                },
+                "confirm_delete_title": "Elimina gruppo"
+            }
+        },
+        "dialog": {
+            "edit_task": {
+                "title": "Modifica attività",
+                "fields": {
+                    "interval_value": {
+                        "heading": "Intervallo"
+                    },
+                    "interval_type": {
+                        "heading": "Tipo di intervallo"
+                    },
+                    "last_performed": {
+                        "heading": "Ultima esecuzione",
+                        "helper": "Lascia vuoto per usare oggi"
+                    },
+                    "anchor_date": {
+                        "heading": "Data di riferimento",
+                        "helper": "La pianificazione si ripete a partire da questa data fissa"
+                    },
+                    "tag": {
+                        "heading": "Tag"
+                    },
+                    "icon": {
+                        "heading": "Icona"
+                    },
+                    "label": {
+                        "heading": "Etichetta/e"
+                    },
+                    "area": {
+                        "heading": "Area"
+                    },
+                    "trigger_type": {
+                        "heading": "Tipo di attivazione"
+                    },
+                    "count_entity_id": {
+                        "heading": "Entità conteggiata"
+                    },
+                    "count_threshold": {
+                        "heading": "Soglia di conteggio"
+                    },
+                    "runtime_entity_id": {
+                        "heading": "Sensore tempo di funzionamento"
+                    },
+                    "runtime_threshold": {
+                        "heading": "Soglia tempo di funzionamento"
+                    },
+                    "title": {
+                        "heading": "Titolo"
+                    },
+                    "description": {
+                        "heading": "Descrizione"
+                    },
+                    "group_id": {
+                        "heading": "Gruppo",
+                        "helper": "Scegli un gruppo o digita un nuovo nome"
+                    },
+                    "notifications_enabled": {
+                        "heading": "Abilita notifiche"
+                    },
+                    "notification_target": {
+                        "heading": "Servizio di notifica",
+                        "helper": "Lascia vuoto per usare notify.notify"
+                    },
+                    "notify_when": {
+                        "heading": "Notifica quando"
+                    },
+                    "notify_days_before_due": {
+                        "heading": "Giorni prima della scadenza",
+                        "helper": "Anticipo facoltativo per il promemoria di scadenza imminente"
+                    },
+                    "notification_time": {
+                        "heading": "Ora del giorno",
+                        "helper": "Quando vengono inviate le notifiche automatiche"
+                    },
+                    "notification_url": {
+                        "heading": "URL da aprire",
+                        "helper": "URL facoltativo per l'azione Apri della notifica"
+                    },
+                    "active_months": {
+                        "heading": "Mesi attivi",
+                        "helper": "Le attività stagionali scadono solo in questi mesi (vuoto = tutto l'anno)"
+                    }
+                },
+                "sections": {
+                    "optional": "Impostazioni facoltative",
+                    "notifications": "Notifiche",
+                    "history": "Cronologia"
+                },
+                "actions": {
+                    "cancel": "Annulla",
+                    "save": "Salva",
+                    "test_notification": "Invia notifica di prova"
+                },
+                "alerts": {
+                    "error": "Impossibile salvare le modifiche. Vedi la console per i dettagli.",
+                    "test_error": "Impossibile inviare la notifica di prova. Vedi la console per i dettagli."
+                }
+            },
+            "move_task": {
+                "title": "Sposta attività",
+                "fields": {
+                    "group_id": {
+                        "heading": "Gruppo"
+                    }
+                },
+                "actions": {
+                    "cancel": "Annulla",
+                    "move": "Sposta"
+                }
+            },
+            "confirm_complete": {
+                "title": "Contrassegna attività come completata",
+                "message": "Contrassegnare \"{title}\" come completata? L'ultima esecuzione sarà reimpostata a oggi e la prossima scadenza sarà ricalcolata in base all'intervallo {interval}.",
+                "message_progress": "Contrassegnare \"{title}\" come completata? L'avanzamento ({interval}) ripartirà da zero.",
+                "note_label": "Nota (facoltativa)",
+                "actions": {
+                    "confirm": "Contrassegna come completata"
+                }
+            },
+            "confirm_remove": {
+                "title": "Rimuovi attività",
+                "message": "Rimuovere \"{title}\"? L'operazione non può essere annullata.",
+                "actions": {
+                    "confirm": "Rimuovi"
+                }
+            },
+            "templates": {
+                "title": "Modelli di attività",
+                "search": "Cerca modelli...",
+                "import_csv": "Importa da CSV",
+                "choose_csv": "Scegli file CSV",
+                "csv_hint": "Colonne: title (obbligatoria), description, interval_value, interval_type, last_performed (AAAA-MM-GG), icon, group_id",
+                "csv_empty": "Nessuna riga importabile trovata nel file.",
+                "no_matches": "Nessun modello corrisponde alla ricerca.",
+                "import_count": "{count, plural, one {Importa 1 attività} other {Importa # attività}}",
+                "imported": "{count, plural, one {1 attività importata.} other {# attività importate.}}",
+                "import_failed": "Importazione non riuscita: {titles}",
+                "preview": {
+                    "title": "Titolo",
+                    "interval": "Intervallo",
+                    "last_performed": "Ultima esecuzione",
+                    "group": "Gruppo"
+                }
+            }
+        },
+        "toolbar": {
+            "add_task": "Aggiungi attività",
+            "manage_groups": "Gestisci gruppi"
+        },
+        "nav": {
+            "all_tasks": "Tutte le attività",
+            "done_editing": "Fine"
+        },
+        "list": {
+            "due_today": "Scade oggi",
+            "days_overdue": "{count, plural, one {1 giorno di ritardo} other {# giorni di ritardo}}",
+            "days_left": "{count, plural, one {Scade tra 1 giorno} other {# giorni rimanenti}}",
+            "search": "Cerca attività...",
+            "all_groups": "Tutti i gruppi",
+            "overdue": "Scadute",
+            "due_soon": "In scadenza",
+            "upcoming": "In arrivo",
+            "no_tasks": "Nessuna attività trovata",
+            "done": "Completate",
+            "last_performed": "Ultima esecuzione",
+            "progress": "Avanzamento",
+            "history": "Cronologia",
+            "complete": "Completa",
+            "remove": "Rimuovi",
+            "all_caught_up": "Tutto in ordine",
+            "needs_attention": "{count, plural, one {1 attività richiede attenzione} other {# attività richiedono attenzione}}",
+            "done_today": "Fatte oggi",
+            "repeats": "Ripetizione",
+            "next_due": "Prossima scadenza: {date}",
+            "clear_search": "Cancella ricerca",
+            "group_by": "Raggruppa per",
+            "by_status": "Stato"
+        },
+        "empty": {
+            "title": "Ancora nessuna attività",
+            "message": "Aggiungi la tua prima attività o parti dalla libreria di modelli con le attività domestiche più comuni.",
+            "message_readonly": "Le attività aggiunte da un amministratore compariranno qui."
+        }
+    },
+    "templates": {
+        "categories": {
+            "hvac": "Climatizzazione",
+            "plumbing": "Idraulica",
+            "electrical": "Impianto elettrico",
+            "appliances": "Elettrodomestici",
+            "interior": "Interni",
+            "exterior": "Esterni",
+            "yard": "Giardino",
+            "safety": "Sicurezza",
+            "vehicles": "Veicoli"
+        }
+    }
+}

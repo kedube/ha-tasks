@@ -1,0 +1,375 @@
+{
+    "common": {
+        "loading": "Ładowanie...",
+        "none": "Brak",
+        "no_tasks": "Nie znaleziono zadań.",
+        "ungrouped": "Bez grupy",
+        "cancel": "Anuluj",
+        "invalid_date": "Wprowadzono nieprawidłową datę."
+    },
+    "intervals": {
+        "day": "Dzień",
+        "days": "Dni",
+        "week": "Tydzień",
+        "weeks": "Tygodnie",
+        "month": "Miesiąc",
+        "months": "Miesiące",
+        "year": "Rok",
+        "years": "Lata",
+        "every_uses": "Co {value} użyć",
+        "every_runtime": "Co {value} czasu pracy"
+    },
+    "trigger_types": {
+        "time": "Na podstawie czasu",
+        "date": "Stała data",
+        "count": "Na podstawie liczby użyć",
+        "runtime": "Na podstawie czasu pracy"
+    },
+    "notifications": {
+        "when": {
+            "due": "Termin",
+            "overdue": "Po terminie",
+            "due_and_overdue": "Termin i po terminie"
+        }
+    },
+    "card": {
+        "add_task": {
+            "added": "Dodano \"{title}\".",
+            "admin_only": "Tylko administratorzy mogą dodawać zadania."
+        }
+    },
+    "panel": {
+        "cards": {
+            "new": {
+                "title": "Utwórz nowe zadanie",
+                "fields": {
+                    "title": {
+                        "heading": "Tytuł zadania"
+                    },
+                    "interval_value": {
+                        "heading": "Interwał"
+                    },
+                    "interval_type": {
+                        "heading": "Typ interwału"
+                    },
+                    "last_performed": {
+                        "heading": "Ostatnio wykonane",
+                        "helper": "Pozostaw puste, aby użyć dzisiejszej daty"
+                    },
+                    "anchor_date": {
+                        "heading": "Data odniesienia",
+                        "helper": "Harmonogram powtarza się od tej stałej daty"
+                    },
+                    "tag": {
+                        "heading": "Tag"
+                    },
+                    "icon": {
+                        "heading": "Ikona"
+                    },
+                    "label": {
+                        "heading": "Etykieta(-y)"
+                    },
+                    "area": {
+                        "heading": "Obszar"
+                    },
+                    "description": {
+                        "heading": "Opis"
+                    },
+                    "trigger_type": {
+                        "heading": "Typ wyzwalacza"
+                    },
+                    "count_entity_id": {
+                        "heading": "Zliczana encja"
+                    },
+                    "count_threshold": {
+                        "heading": "Próg liczby użyć"
+                    },
+                    "runtime_entity_id": {
+                        "heading": "Czujnik czasu pracy"
+                    },
+                    "runtime_threshold": {
+                        "heading": "Próg czasu pracy"
+                    },
+                    "group_id": {
+                        "heading": "Grupa",
+                        "helper": "Wybierz grupę lub wpisz nową nazwę"
+                    },
+                    "notifications_enabled": {
+                        "heading": "Włącz powiadomienia"
+                    },
+                    "notification_target": {
+                        "heading": "Usługa powiadomień",
+                        "helper": "Pozostaw puste, aby użyć notify.notify"
+                    },
+                    "notify_when": {
+                        "heading": "Powiadamiaj, gdy"
+                    },
+                    "notify_days_before_due": {
+                        "heading": "Dni przed terminem",
+                        "helper": "Opcjonalne wyprzedzenie przypomnienia o zbliżającym się terminie"
+                    },
+                    "notification_time": {
+                        "heading": "Pora dnia",
+                        "helper": "Kiedy wysyłane są automatyczne powiadomienia"
+                    },
+                    "notification_url": {
+                        "heading": "Adres URL do otwarcia",
+                        "helper": "Opcjonalny adres URL dla akcji Otwórz w powiadomieniu"
+                    },
+                    "active_months": {
+                        "heading": "Aktywne miesiące",
+                        "helper": "Zadania sezonowe są wymagane tylko w tych miesiącach (puste = cały rok)"
+                    }
+                },
+                "sections": {
+                    "optional": "Ustawienia opcjonalne",
+                    "notifications": "Powiadomienia"
+                },
+                "actions": {
+                    "add_task": "Dodaj zadanie"
+                },
+                "alerts": {
+                    "required": "Wypełnij wszystkie pola",
+                    "error": "Błąd podczas dodawania zadania. Szczegóły w konsoli."
+                }
+            },
+            "current": {
+                "next": "Następny termin",
+                "actions": {
+                    "edit": "Edytuj",
+                    "move": "Przenieś do grupy",
+                    "remove": "Usuń"
+                },
+                "alerts": {
+                    "complete_success": "\"{title}\" oznaczono jako wykonane. Następny termin został przeliczony.",
+                    "complete_error": "Nie udało się oznaczyć zadania jako wykonane. Szczegóły w konsoli.",
+                    "remove_error": "Nie udało się usunąć zadania. Szczegóły w konsoli."
+                },
+                "filter": {
+                    "search": "Szukaj zadań...",
+                    "templates": "Przeglądaj szablony",
+                    "export": "Eksportuj CSV",
+                    "clear": "Wyczyść filtry"
+                }
+            },
+            "groups": {
+                "title": "Grupy",
+                "fields": {
+                    "new_group": {
+                        "heading": "Nowa grupa"
+                    }
+                },
+                "actions": {
+                    "create": "Utwórz",
+                    "rename": "Zmień nazwę",
+                    "delete": "Usuń",
+                    "save": "Zapisz"
+                },
+                "empty": "Brak grup. Utwórz grupę, aby uporządkować zadania.",
+                "confirm_delete": "Usunąć grupę \"{title}\"? Jej zadania trafią do kategorii Bez grupy.",
+                "alerts": {
+                    "error": "Nie udało się utworzyć grupy. Sprawdź konsolę przeglądarki i logi Home Assistant.",
+                    "exists": "Grupa \"{title}\" już istnieje.",
+                    "rename_error": "Nie udało się zmienić nazwy grupy. Szczegóły w konsoli.",
+                    "delete_error": "Nie udało się usunąć grupy. Szczegóły w konsoli."
+                },
+                "confirm_delete_title": "Usuń grupę"
+            }
+        },
+        "dialog": {
+            "edit_task": {
+                "title": "Edytuj zadanie",
+                "fields": {
+                    "interval_value": {
+                        "heading": "Interwał"
+                    },
+                    "interval_type": {
+                        "heading": "Typ interwału"
+                    },
+                    "last_performed": {
+                        "heading": "Ostatnio wykonane",
+                        "helper": "Pozostaw puste, aby użyć dzisiejszej daty"
+                    },
+                    "anchor_date": {
+                        "heading": "Data odniesienia",
+                        "helper": "Harmonogram powtarza się od tej stałej daty"
+                    },
+                    "tag": {
+                        "heading": "Tag"
+                    },
+                    "icon": {
+                        "heading": "Ikona"
+                    },
+                    "label": {
+                        "heading": "Etykieta(-y)"
+                    },
+                    "area": {
+                        "heading": "Obszar"
+                    },
+                    "trigger_type": {
+                        "heading": "Typ wyzwalacza"
+                    },
+                    "count_entity_id": {
+                        "heading": "Zliczana encja"
+                    },
+                    "count_threshold": {
+                        "heading": "Próg liczby użyć"
+                    },
+                    "runtime_entity_id": {
+                        "heading": "Czujnik czasu pracy"
+                    },
+                    "runtime_threshold": {
+                        "heading": "Próg czasu pracy"
+                    },
+                    "title": {
+                        "heading": "Tytuł"
+                    },
+                    "description": {
+                        "heading": "Opis"
+                    },
+                    "group_id": {
+                        "heading": "Grupa",
+                        "helper": "Wybierz grupę lub wpisz nową nazwę"
+                    },
+                    "notifications_enabled": {
+                        "heading": "Włącz powiadomienia"
+                    },
+                    "notification_target": {
+                        "heading": "Usługa powiadomień",
+                        "helper": "Pozostaw puste, aby użyć notify.notify"
+                    },
+                    "notify_when": {
+                        "heading": "Powiadamiaj, gdy"
+                    },
+                    "notify_days_before_due": {
+                        "heading": "Dni przed terminem",
+                        "helper": "Opcjonalne wyprzedzenie przypomnienia o zbliżającym się terminie"
+                    },
+                    "notification_time": {
+                        "heading": "Pora dnia",
+                        "helper": "Kiedy wysyłane są automatyczne powiadomienia"
+                    },
+                    "notification_url": {
+                        "heading": "Adres URL do otwarcia",
+                        "helper": "Opcjonalny adres URL dla akcji Otwórz w powiadomieniu"
+                    },
+                    "active_months": {
+                        "heading": "Aktywne miesiące",
+                        "helper": "Zadania sezonowe są wymagane tylko w tych miesiącach (puste = cały rok)"
+                    }
+                },
+                "sections": {
+                    "optional": "Ustawienia opcjonalne",
+                    "notifications": "Powiadomienia",
+                    "history": "Historia"
+                },
+                "actions": {
+                    "cancel": "Anuluj",
+                    "save": "Zapisz",
+                    "test_notification": "Wyślij powiadomienie testowe"
+                },
+                "alerts": {
+                    "error": "Nie udało się zapisać zmian. Szczegóły w konsoli.",
+                    "test_error": "Nie udało się wysłać powiadomienia testowego. Szczegóły w konsoli."
+                }
+            },
+            "move_task": {
+                "title": "Przenieś zadanie",
+                "fields": {
+                    "group_id": {
+                        "heading": "Grupa"
+                    }
+                },
+                "actions": {
+                    "cancel": "Anuluj",
+                    "move": "Przenieś"
+                }
+            },
+            "confirm_complete": {
+                "title": "Oznacz zadanie jako wykonane",
+                "message": "Oznaczyć \"{title}\" jako wykonane? Data ostatniego wykonania zostanie ustawiona na dziś, a następny termin zostanie przeliczony na podstawie interwału {interval}.",
+                "message_progress": "Oznaczyć \"{title}\" jako wykonane? Postęp ({interval}) zacznie się od nowa.",
+                "note_label": "Notatka (opcjonalnie)",
+                "actions": {
+                    "confirm": "Oznacz jako wykonane"
+                }
+            },
+            "confirm_remove": {
+                "title": "Usuń zadanie",
+                "message": "Usunąć \"{title}\"? Tej operacji nie można cofnąć.",
+                "actions": {
+                    "confirm": "Usuń"
+                }
+            },
+            "templates": {
+                "title": "Szablony zadań",
+                "search": "Szukaj szablonów...",
+                "import_csv": "Importuj z CSV",
+                "choose_csv": "Wybierz plik CSV",
+                "csv_hint": "Kolumny: title (wymagana), description, interval_value, interval_type, last_performed (RRRR-MM-DD), icon, group_id",
+                "csv_empty": "Nie znaleziono wierszy do zaimportowania.",
+                "no_matches": "Żaden szablon nie pasuje do wyszukiwania.",
+                "import_count": "{count, plural, one {Importuj 1 zadanie} few {Importuj # zadania} many {Importuj # zadań} other {Importuj # zadania}}",
+                "imported": "{count, plural, one {Zaimportowano 1 zadanie.} few {Zaimportowano # zadania.} many {Zaimportowano # zadań.} other {Zaimportowano # zadania.}}",
+                "import_failed": "Nie udało się zaimportować: {titles}",
+                "preview": {
+                    "title": "Tytuł",
+                    "interval": "Interwał",
+                    "last_performed": "Ostatnio wykonano",
+                    "group": "Grupa"
+                }
+            }
+        },
+        "toolbar": {
+            "add_task": "Dodaj zadanie",
+            "manage_groups": "Zarządzaj grupami"
+        },
+        "nav": {
+            "all_tasks": "Wszystkie zadania",
+            "done_editing": "Gotowe"
+        },
+        "list": {
+            "due_today": "Termin dzisiaj",
+            "days_overdue": "{count, plural, one {1 dzień po terminie} few {# dni po terminie} many {# dni po terminie} other {# dnia po terminie}}",
+            "days_left": "{count, plural, one {Termin za 1 dzień} few {Zostały # dni} many {Zostało # dni} other {Zostało # dnia}}",
+            "search": "Szukaj zadań...",
+            "all_groups": "Wszystkie grupy",
+            "overdue": "Po terminie",
+            "due_soon": "Wkrótce termin",
+            "upcoming": "Nadchodzące",
+            "no_tasks": "Nie znaleziono zadań",
+            "done": "Wykonane",
+            "last_performed": "Ostatnio wykonane",
+            "progress": "Postęp",
+            "history": "Historia",
+            "complete": "Wykonane",
+            "remove": "Usuń",
+            "all_caught_up": "Wszystko zrobione",
+            "needs_attention": "{count, plural, one {1 zadanie wymaga uwagi} few {# zadania wymagają uwagi} many {# zadań wymaga uwagi} other {# zadania wymaga uwagi}}",
+            "done_today": "Zrobione dzisiaj",
+            "repeats": "Powtarzanie",
+            "next_due": "Następny termin: {date}",
+            "clear_search": "Wyczyść wyszukiwanie",
+            "group_by": "Grupuj według",
+            "by_status": "Status"
+        },
+        "empty": {
+            "title": "Brak zadań",
+            "message": "Dodaj pierwsze zadanie lub zacznij od biblioteki szablonów typowych prac domowych.",
+            "message_readonly": "Zadania dodane przez administratora pojawią się tutaj."
+        }
+    },
+    "templates": {
+        "categories": {
+            "hvac": "Ogrzewanie i klimatyzacja",
+            "plumbing": "Hydraulika",
+            "electrical": "Elektryka",
+            "appliances": "Sprzęt AGD",
+            "interior": "Wnętrze",
+            "exterior": "Na zewnątrz",
+            "yard": "Ogród",
+            "safety": "Bezpieczeństwo",
+            "vehicles": "Pojazdy"
+        }
+    }
+}

@@ -1,0 +1,46 @@
+{
+  "config": {
+    "flow_title": "Tasks",
+    "step": {
+      "user": {
+        "title": "Configurar Tasks",
+        "description": "Configure a integração Tasks.",
+        "data": {
+          "admin_only": "Restringir o painel apenas a administradores",
+          "sidebar_title": "O nome exibido na barra lateral para esta integração."
+        },
+        "data_description": {
+          "admin_only": "Quando desativado, outros usuários podem abrir o painel para ver as tarefas e marcá-las como concluídas; adicionar, editar e remover tarefas continua restrito aos administradores."
+        }
+      }
+    },
+    "abort": {
+      "single_instance_allowed": "Apenas uma única instância do Tasks é permitida."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "admin_only": "Restringir o painel apenas a administradores",
+          "sidebar_title": "O nome exibido na barra lateral para esta integração.",
+          "due_soon_days": "Janela de \"Vence em breve\" no painel (dias)",
+          "max_history_entries": "Entradas de histórico mantidas por tarefa (0 = ilimitado)"
+        },
+        "data_description": {
+          "admin_only": "Quando desativado, outros usuários podem abrir o painel para ver as tarefas e marcá-las como concluídas; adicionar, editar e remover tarefas continua restrito aos administradores."
+        }
+      }
+    }
+  },
+  "issues": {
+    "missing_watched_entity": {
+      "title": "A entidade monitorada de \"{title}\" está ausente",
+      "description": "A tarefa \"{title}\" monitora `{entity_id}`, mas essa entidade não existe mais. O contador ou o progresso de tempo de uso da tarefa não avançará até que a entidade retorne ou a tarefa seja atualizada para monitorar outra entidade."
+    },
+    "missing_notify_service": {
+      "title": "O serviço de notificação de \"{title}\" está ausente",
+      "description": "A tarefa \"{title}\" envia notificações via `{service}`, mas esse serviço não está disponível. As notificações desta tarefa falharão até que o serviço retorne ou a tarefa seja atualizada para usar outro serviço de notificação."
+    }
+  }
+}

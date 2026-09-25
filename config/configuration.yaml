@@ -1,0 +1,22 @@
+# https://www.home-assistant.io/integrations/default_config/
+default_config:
+
+# https://www.home-assistant.io/integrations/homeassistant/
+homeassistant:
+  debug: true
+
+# https://www.home-assistant.io/integrations/logger/
+logger:
+  default: info
+  logs:
+    custom_components: debug
+
+# Example dashboard showcasing the integration (docs/example-dashboard.md)
+lovelace:
+  dashboards:
+    tasks-example:
+      mode: yaml
+      title: Tasks Example
+      icon: mdi:checkbox-marked-circle-auto-outline
+      show_in_sidebar: true
+      filename: dashboards/tasks-example.yaml

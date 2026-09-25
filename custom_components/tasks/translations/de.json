@@ -1,0 +1,46 @@
+{
+  "config": {
+    "flow_title": "Tasks",
+    "step": {
+      "user": {
+        "title": "Tasks konfigurieren",
+        "description": "Richten Sie die Tasks-Integration ein.",
+        "data": {
+          "admin_only": "Panel nur für Administratoren anzeigen",
+          "sidebar_title": "Der Name, der in der Seitenleiste für diese Integration angezeigt wird."
+        },
+        "data_description": {
+          "admin_only": "Wenn deaktiviert, können andere Benutzer das Panel öffnen, Aufgaben ansehen und als erledigt markieren; Aufgaben hinzufügen, bearbeiten und entfernen bleibt Administratoren vorbehalten."
+        }
+      }
+    },
+    "abort": {
+      "single_instance_allowed": "Es ist nur eine einzige Instanz von Tasks erlaubt."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "admin_only": "Panel nur für Administratoren anzeigen",
+          "sidebar_title": "Der Name, der in der Seitenleiste für diese Integration angezeigt wird.",
+          "due_soon_days": "Zeitraum für „Bald fällig“ im Panel (Tage)",
+          "max_history_entries": "Gespeicherte Verlaufseinträge pro Aufgabe (0 = unbegrenzt)"
+        },
+        "data_description": {
+          "admin_only": "Wenn deaktiviert, können andere Benutzer das Panel öffnen, Aufgaben ansehen und als erledigt markieren; Aufgaben hinzufügen, bearbeiten und entfernen bleibt Administratoren vorbehalten."
+        }
+      }
+    }
+  },
+  "issues": {
+    "missing_watched_entity": {
+      "title": "Überwachte Entität für \"{title}\" fehlt",
+      "description": "Die Aufgabe \"{title}\" überwacht `{entity_id}`, aber diese Entität existiert nicht mehr. Der Zähler bzw. Laufzeitfortschritt der Aufgabe wird nicht weiterlaufen, bis die Entität zurückkehrt oder die Aufgabe auf eine andere Entität umgestellt wird."
+    },
+    "missing_notify_service": {
+      "title": "Benachrichtigungsdienst für \"{title}\" fehlt",
+      "description": "Die Aufgabe \"{title}\" sendet Benachrichtigungen über `{service}`, aber dieser Dienst ist nicht verfügbar. Benachrichtigungen für diese Aufgabe schlagen fehl, bis der Dienst zurückkehrt oder die Aufgabe auf einen anderen Benachrichtigungsdienst umgestellt wird."
+    }
+  }
+}

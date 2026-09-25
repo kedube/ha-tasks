@@ -1,0 +1,375 @@
+{
+    "common": {
+        "loading": "Laden...",
+        "none": "Geen",
+        "no_tasks": "Geen taken gevonden.",
+        "ungrouped": "Niet gegroepeerd",
+        "cancel": "Annuleren",
+        "invalid_date": "Ongeldige datum ingevoerd."
+    },
+    "intervals": {
+        "day": "Dag",
+        "days": "Dagen",
+        "week": "Week",
+        "weeks": "Weken",
+        "month": "Maand",
+        "months": "Maanden",
+        "year": "Jaar",
+        "years": "Jaren",
+        "every_uses": "Om de {value} gebruiksbeurten",
+        "every_runtime": "Om de {value} draaitijd"
+    },
+    "trigger_types": {
+        "time": "Op basis van tijd",
+        "date": "Vaste datum",
+        "count": "Op basis van aantal",
+        "runtime": "Op basis van draaitijd"
+    },
+    "notifications": {
+        "when": {
+            "due": "Op vervaldatum",
+            "overdue": "Achterstallig",
+            "due_and_overdue": "Op vervaldatum en achterstallig"
+        }
+    },
+    "card": {
+        "add_task": {
+            "added": "\"{title}\" toegevoegd.",
+            "admin_only": "Alleen beheerders kunnen taken toevoegen."
+        }
+    },
+    "panel": {
+        "cards": {
+            "new": {
+                "title": "Nieuwe taak aanmaken",
+                "fields": {
+                    "title": {
+                        "heading": "Taaktitel"
+                    },
+                    "interval_value": {
+                        "heading": "Interval"
+                    },
+                    "interval_type": {
+                        "heading": "Intervaltype"
+                    },
+                    "last_performed": {
+                        "heading": "Laatst uitgevoerd",
+                        "helper": "Laat leeg om vandaag te gebruiken"
+                    },
+                    "anchor_date": {
+                        "heading": "Ankerdatum",
+                        "helper": "Het schema herhaalt zich vanaf deze vaste datum"
+                    },
+                    "tag": {
+                        "heading": "Tag"
+                    },
+                    "icon": {
+                        "heading": "Pictogram"
+                    },
+                    "label": {
+                        "heading": "Label(s)"
+                    },
+                    "area": {
+                        "heading": "Ruimte"
+                    },
+                    "description": {
+                        "heading": "Beschrijving"
+                    },
+                    "trigger_type": {
+                        "heading": "Triggertype"
+                    },
+                    "count_entity_id": {
+                        "heading": "Getelde entiteit"
+                    },
+                    "count_threshold": {
+                        "heading": "Teldrempel"
+                    },
+                    "runtime_entity_id": {
+                        "heading": "Draaitijdsensor"
+                    },
+                    "runtime_threshold": {
+                        "heading": "Draaitijddrempel"
+                    },
+                    "group_id": {
+                        "heading": "Groep",
+                        "helper": "Kies een groep of typ een nieuwe naam"
+                    },
+                    "notifications_enabled": {
+                        "heading": "Meldingen inschakelen"
+                    },
+                    "notification_target": {
+                        "heading": "Meldingsservice",
+                        "helper": "Laat leeg om notify.notify te gebruiken"
+                    },
+                    "notify_when": {
+                        "heading": "Melden wanneer"
+                    },
+                    "notify_days_before_due": {
+                        "heading": "Dagen vóór vervaldatum",
+                        "helper": "Optionele vooruitlooptijd voor de herinnering"
+                    },
+                    "notification_time": {
+                        "heading": "Tijdstip",
+                        "helper": "Wanneer automatische meldingen worden verzonden"
+                    },
+                    "notification_url": {
+                        "heading": "URL openen",
+                        "helper": "Optionele URL voor de Open-actie van de melding"
+                    },
+                    "active_months": {
+                        "heading": "Actieve maanden",
+                        "helper": "Seizoenstaken zijn alleen in deze maanden verschuldigd (leeg = het hele jaar)"
+                    }
+                },
+                "sections": {
+                    "optional": "Optionele instellingen",
+                    "notifications": "Meldingen"
+                },
+                "actions": {
+                    "add_task": "Taak toevoegen"
+                },
+                "alerts": {
+                    "required": "Vul alle velden in",
+                    "error": "Fout bij het toevoegen van de taak. Zie de console voor details."
+                }
+            },
+            "current": {
+                "next": "Volgende vervaldatum",
+                "actions": {
+                    "edit": "Bewerken",
+                    "move": "Verplaatsen naar groep",
+                    "remove": "Verwijderen"
+                },
+                "alerts": {
+                    "complete_success": "\"{title}\" gemarkeerd als voltooid. De volgende vervaldatum is opnieuw berekend.",
+                    "complete_error": "Kan de taak niet als voltooid markeren. Zie de console voor details.",
+                    "remove_error": "Kan de taak niet verwijderen. Zie de console voor details."
+                },
+                "filter": {
+                    "search": "Taken zoeken...",
+                    "templates": "Sjablonen bekijken",
+                    "export": "CSV exporteren",
+                    "clear": "Filters wissen"
+                }
+            },
+            "groups": {
+                "title": "Groepen",
+                "fields": {
+                    "new_group": {
+                        "heading": "Nieuwe groep"
+                    }
+                },
+                "actions": {
+                    "create": "Aanmaken",
+                    "rename": "Hernoemen",
+                    "delete": "Verwijderen",
+                    "save": "Opslaan"
+                },
+                "empty": "Nog geen groepen. Maak er een aan om je taken te organiseren.",
+                "confirm_delete": "Groep \"{title}\" verwijderen? De taken worden verplaatst naar Niet gegroepeerd.",
+                "alerts": {
+                    "error": "Kan de groep niet aanmaken. Controleer de browserconsole en de Home Assistant-logboeken.",
+                    "exists": "Groep \"{title}\" bestaat al.",
+                    "rename_error": "Kan de groep niet hernoemen. Zie de console voor details.",
+                    "delete_error": "Kan de groep niet verwijderen. Zie de console voor details."
+                },
+                "confirm_delete_title": "Groep verwijderen"
+            }
+        },
+        "dialog": {
+            "edit_task": {
+                "title": "Taak bewerken",
+                "fields": {
+                    "interval_value": {
+                        "heading": "Interval"
+                    },
+                    "interval_type": {
+                        "heading": "Intervaltype"
+                    },
+                    "last_performed": {
+                        "heading": "Laatst uitgevoerd",
+                        "helper": "Laat leeg om vandaag te gebruiken"
+                    },
+                    "anchor_date": {
+                        "heading": "Ankerdatum",
+                        "helper": "Het schema herhaalt zich vanaf deze vaste datum"
+                    },
+                    "tag": {
+                        "heading": "Tag"
+                    },
+                    "icon": {
+                        "heading": "Pictogram"
+                    },
+                    "label": {
+                        "heading": "Label(s)"
+                    },
+                    "area": {
+                        "heading": "Ruimte"
+                    },
+                    "trigger_type": {
+                        "heading": "Triggertype"
+                    },
+                    "count_entity_id": {
+                        "heading": "Getelde entiteit"
+                    },
+                    "count_threshold": {
+                        "heading": "Teldrempel"
+                    },
+                    "runtime_entity_id": {
+                        "heading": "Draaitijdsensor"
+                    },
+                    "runtime_threshold": {
+                        "heading": "Draaitijddrempel"
+                    },
+                    "title": {
+                        "heading": "Titel"
+                    },
+                    "description": {
+                        "heading": "Beschrijving"
+                    },
+                    "group_id": {
+                        "heading": "Groep",
+                        "helper": "Kies een groep of typ een nieuwe naam"
+                    },
+                    "notifications_enabled": {
+                        "heading": "Meldingen inschakelen"
+                    },
+                    "notification_target": {
+                        "heading": "Meldingsservice",
+                        "helper": "Laat leeg om notify.notify te gebruiken"
+                    },
+                    "notify_when": {
+                        "heading": "Melden wanneer"
+                    },
+                    "notify_days_before_due": {
+                        "heading": "Dagen vóór vervaldatum",
+                        "helper": "Optionele vooruitlooptijd voor de herinnering"
+                    },
+                    "notification_time": {
+                        "heading": "Tijdstip",
+                        "helper": "Wanneer automatische meldingen worden verzonden"
+                    },
+                    "notification_url": {
+                        "heading": "URL openen",
+                        "helper": "Optionele URL voor de Open-actie van de melding"
+                    },
+                    "active_months": {
+                        "heading": "Actieve maanden",
+                        "helper": "Seizoenstaken zijn alleen in deze maanden verschuldigd (leeg = het hele jaar)"
+                    }
+                },
+                "sections": {
+                    "optional": "Optionele instellingen",
+                    "notifications": "Meldingen",
+                    "history": "Geschiedenis"
+                },
+                "actions": {
+                    "cancel": "Annuleren",
+                    "save": "Opslaan",
+                    "test_notification": "Testmelding verzenden"
+                },
+                "alerts": {
+                    "error": "Kan de wijzigingen niet opslaan. Zie de console voor details.",
+                    "test_error": "Kan de testmelding niet verzenden. Zie de console voor details."
+                }
+            },
+            "move_task": {
+                "title": "Taak verplaatsen",
+                "fields": {
+                    "group_id": {
+                        "heading": "Groep"
+                    }
+                },
+                "actions": {
+                    "cancel": "Annuleren",
+                    "move": "Verplaatsen"
+                }
+            },
+            "confirm_complete": {
+                "title": "Taak als voltooid markeren",
+                "message": "\"{title}\" als voltooid markeren? Laatst uitgevoerd wordt teruggezet naar vandaag en de volgende vervaldatum wordt opnieuw berekend op basis van het interval {interval}.",
+                "message_progress": "\"{title}\" als voltooid markeren? De voortgang ({interval}) begint opnieuw.",
+                "note_label": "Notitie (optioneel)",
+                "actions": {
+                    "confirm": "Als voltooid markeren"
+                }
+            },
+            "confirm_remove": {
+                "title": "Taak verwijderen",
+                "message": "\"{title}\" verwijderen? Dit kan niet ongedaan worden gemaakt.",
+                "actions": {
+                    "confirm": "Verwijderen"
+                }
+            },
+            "templates": {
+                "title": "Taaksjablonen",
+                "search": "Sjablonen zoeken...",
+                "import_csv": "Importeren uit CSV",
+                "choose_csv": "CSV-bestand kiezen",
+                "csv_hint": "Kolommen: title (verplicht), description, interval_value, interval_type, last_performed (JJJJ-MM-DD), icon, group_id",
+                "csv_empty": "Geen importeerbare rijen gevonden in het bestand.",
+                "no_matches": "Geen sjablonen gevonden voor je zoekopdracht.",
+                "import_count": "{count, plural, one {1 taak importeren} other {# taken importeren}}",
+                "imported": "{count, plural, one {1 taak geïmporteerd.} other {# taken geïmporteerd.}}",
+                "import_failed": "Importeren mislukt: {titles}",
+                "preview": {
+                    "title": "Titel",
+                    "interval": "Interval",
+                    "last_performed": "Laatst uitgevoerd",
+                    "group": "Groep"
+                }
+            }
+        },
+        "toolbar": {
+            "add_task": "Taak toevoegen",
+            "manage_groups": "Groepen beheren"
+        },
+        "nav": {
+            "all_tasks": "Alle taken",
+            "done_editing": "Klaar"
+        },
+        "list": {
+            "due_today": "Vervalt vandaag",
+            "days_overdue": "{count, plural, one {1 dag achterstallig} other {# dagen achterstallig}}",
+            "days_left": "{count, plural, one {Vervalt over 1 dag} other {Nog # dagen}}",
+            "search": "Taken zoeken...",
+            "all_groups": "Alle groepen",
+            "overdue": "Achterstallig",
+            "due_soon": "Vervalt binnenkort",
+            "upcoming": "Aankomend",
+            "no_tasks": "Geen taken gevonden",
+            "done": "Voltooid",
+            "last_performed": "Laatst uitgevoerd",
+            "progress": "Voortgang",
+            "history": "Geschiedenis",
+            "complete": "Voltooien",
+            "remove": "Verwijderen",
+            "all_caught_up": "Alles bijgewerkt",
+            "needs_attention": "{count, plural, one {1 taak vraagt aandacht} other {# taken vragen aandacht}}",
+            "done_today": "Vandaag gedaan",
+            "repeats": "Herhaling",
+            "next_due": "Volgende keer: {date}",
+            "clear_search": "Zoekopdracht wissen",
+            "group_by": "Groeperen op",
+            "by_status": "Status"
+        },
+        "empty": {
+            "title": "Nog geen taken",
+            "message": "Voeg je eerste taak toe of begin met de sjabloonbibliotheek met veelvoorkomende huishoudelijke taken.",
+            "message_readonly": "Taken die een beheerder toevoegt, verschijnen hier."
+        }
+    },
+    "templates": {
+        "categories": {
+            "hvac": "Verwarming & airco",
+            "plumbing": "Sanitair",
+            "electrical": "Elektra",
+            "appliances": "Apparaten",
+            "interior": "Binnen",
+            "exterior": "Buiten",
+            "yard": "Tuin",
+            "safety": "Veiligheid",
+            "vehicles": "Voertuigen"
+        }
+    }
+}

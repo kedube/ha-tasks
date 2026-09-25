@@ -1,0 +1,46 @@
+{
+  "config": {
+    "flow_title": "Tasks",
+    "step": {
+      "user": {
+        "title": "Tasks configureren",
+        "description": "Stel de Tasks-integratie in.",
+        "data": {
+          "admin_only": "Beperk het paneel tot alleen beheerders",
+          "sidebar_title": "De naam die in de zijbalk wordt getoond voor deze integratie."
+        },
+        "data_description": {
+          "admin_only": "Indien uitgeschakeld kunnen andere gebruikers het paneel openen om taken te bekijken en als voltooid te markeren; taken toevoegen, bewerken en verwijderen blijft voorbehouden aan beheerders."
+        }
+      }
+    },
+    "abort": {
+      "single_instance_allowed": "Er is slechts één instantie van Tasks toegestaan."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "admin_only": "Beperk het paneel tot alleen beheerders",
+          "sidebar_title": "De naam die in de zijbalk wordt getoond voor deze integratie.",
+          "due_soon_days": "Venster voor ‘Vervalt binnenkort’ in het paneel (dagen)",
+          "max_history_entries": "Bewaarde geschiedenisitems per taak (0 = onbeperkt)"
+        },
+        "data_description": {
+          "admin_only": "Indien uitgeschakeld kunnen andere gebruikers het paneel openen om taken te bekijken en als voltooid te markeren; taken toevoegen, bewerken en verwijderen blijft voorbehouden aan beheerders."
+        }
+      }
+    }
+  },
+  "issues": {
+    "missing_watched_entity": {
+      "title": "Bewaakte entiteit voor \"{title}\" ontbreekt",
+      "description": "De taak \"{title}\" bewaakt `{entity_id}`, maar die entiteit bestaat niet meer. De teller- of draaitijdvoortgang van de taak wordt niet bijgewerkt totdat de entiteit terugkeert of de taak wordt aangepast om een andere entiteit te bewaken."
+    },
+    "missing_notify_service": {
+      "title": "Meldingsservice voor \"{title}\" ontbreekt",
+      "description": "De taak \"{title}\" verstuurt meldingen via `{service}`, maar die service is niet beschikbaar. Meldingen voor deze taak zullen mislukken totdat de service terugkeert of de taak wordt aangepast om een andere meldingsservice te gebruiken."
+    }
+  }
+}

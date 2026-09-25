@@ -1,0 +1,46 @@
+{
+  "config": {
+    "flow_title": "Tasks",
+    "step": {
+      "user": {
+        "title": "Configura Tasks",
+        "description": "Configura l'integrazione Tasks.",
+        "data": {
+          "admin_only": "Limita il pannello ai soli amministratori",
+          "sidebar_title": "Il nome mostrato nella barra laterale per questa integrazione."
+        },
+        "data_description": {
+          "admin_only": "Se disattivato, gli altri utenti possono aprire il pannello per vedere le attività e segnarle come completate; aggiungere, modificare e rimuovere attività resta riservato agli amministratori."
+        }
+      }
+    },
+    "abort": {
+      "single_instance_allowed": "È consentita una sola istanza di Tasks."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "admin_only": "Limita il pannello ai soli amministratori",
+          "sidebar_title": "Il nome mostrato nella barra laterale per questa integrazione.",
+          "due_soon_days": "Finestra «In scadenza» nel pannello (giorni)",
+          "max_history_entries": "Voci di cronologia conservate per attività (0 = illimitato)"
+        },
+        "data_description": {
+          "admin_only": "Se disattivato, gli altri utenti possono aprire il pannello per vedere le attività e segnarle come completate; aggiungere, modificare e rimuovere attività resta riservato agli amministratori."
+        }
+      }
+    }
+  },
+  "issues": {
+    "missing_watched_entity": {
+      "title": "Entità monitorata per \"{title}\" mancante",
+      "description": "L'attività \"{title}\" monitora `{entity_id}`, ma quell'entità non esiste più. Il conteggio o l'avanzamento del tempo di funzionamento dell'attività non progredirà finché l'entità non tornerà disponibile o l'attività non verrà aggiornata per monitorare un'altra entità."
+    },
+    "missing_notify_service": {
+      "title": "Servizio di notifica per \"{title}\" mancante",
+      "description": "L'attività \"{title}\" invia notifiche tramite `{service}`, ma quel servizio non è disponibile. Le notifiche per questa attività non funzioneranno finché il servizio non tornerà disponibile o l'attività non verrà aggiornata per usare un altro servizio di notifica."
+    }
+  }
+}

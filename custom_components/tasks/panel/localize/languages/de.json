@@ -1,0 +1,375 @@
+{
+    "common": {
+        "loading": "Wird geladen...",
+        "none": "Keine",
+        "no_tasks": "Keine Aufgaben gefunden.",
+        "ungrouped": "Ohne Gruppe",
+        "cancel": "Abbrechen",
+        "invalid_date": "Ungültiges Datum eingegeben."
+    },
+    "intervals": {
+        "day": "Tag",
+        "days": "Tage",
+        "week": "Woche",
+        "weeks": "Wochen",
+        "month": "Monat",
+        "months": "Monate",
+        "year": "Jahr",
+        "years": "Jahre",
+        "every_uses": "Alle {value} Nutzungen",
+        "every_runtime": "Alle {value} Laufzeit"
+    },
+    "trigger_types": {
+        "time": "Zeitbasiert",
+        "date": "Festes Datum",
+        "count": "Zählerbasiert",
+        "runtime": "Laufzeitbasiert"
+    },
+    "notifications": {
+        "when": {
+            "due": "Fällig",
+            "overdue": "Überfällig",
+            "due_and_overdue": "Fällig und überfällig"
+        }
+    },
+    "card": {
+        "add_task": {
+            "added": "\"{title}\" wurde hinzugefügt.",
+            "admin_only": "Nur Administratoren können Aufgaben hinzufügen."
+        }
+    },
+    "panel": {
+        "cards": {
+            "new": {
+                "title": "Neue Aufgabe erstellen",
+                "fields": {
+                    "title": {
+                        "heading": "Aufgabentitel"
+                    },
+                    "interval_value": {
+                        "heading": "Intervall"
+                    },
+                    "interval_type": {
+                        "heading": "Intervalltyp"
+                    },
+                    "last_performed": {
+                        "heading": "Zuletzt durchgeführt",
+                        "helper": "Leer lassen, um heutiges Datum zu verwenden"
+                    },
+                    "anchor_date": {
+                        "heading": "Ankerdatum",
+                        "helper": "Der Zeitplan wiederholt sich ab diesem festen Datum"
+                    },
+                    "tag": {
+                        "heading": "Tag"
+                    },
+                    "icon": {
+                        "heading": "Symbol"
+                    },
+                    "label": {
+                        "heading": "Bezeichnung(en)"
+                    },
+                    "area": {
+                        "heading": "Bereich"
+                    },
+                    "trigger_type": {
+                        "heading": "Auslöser-Typ"
+                    },
+                    "count_entity_id": {
+                        "heading": "Gezählte Entität"
+                    },
+                    "count_threshold": {
+                        "heading": "Zähl-Schwellwert"
+                    },
+                    "runtime_entity_id": {
+                        "heading": "Laufzeit-Sensor"
+                    },
+                    "runtime_threshold": {
+                        "heading": "Laufzeit-Schwellwert"
+                    },
+                    "description": {
+                        "heading": "Beschreibung"
+                    },
+                    "group_id": {
+                        "heading": "Gruppe",
+                        "helper": "Gruppe wählen oder neuen Namen eingeben"
+                    },
+                    "notifications_enabled": {
+                        "heading": "Benachrichtigungen aktivieren"
+                    },
+                    "notification_target": {
+                        "heading": "Benachrichtigungsdienst",
+                        "helper": "Leer lassen, um notify.notify zu verwenden"
+                    },
+                    "notify_when": {
+                        "heading": "Benachrichtigen bei"
+                    },
+                    "notify_days_before_due": {
+                        "heading": "Tage vor Fälligkeit",
+                        "helper": "Optionale Vorab-Erinnerung"
+                    },
+                    "notification_time": {
+                        "heading": "Uhrzeit",
+                        "helper": "Wann automatische Benachrichtigungen gesendet werden"
+                    },
+                    "notification_url": {
+                        "heading": "URL öffnen",
+                        "helper": "Optionale URL für die Aktion „Öffnen“ der Benachrichtigung"
+                    },
+                    "active_months": {
+                        "heading": "Aktive Monate",
+                        "helper": "Saisonale Aufgaben sind nur in diesen Monaten fällig (leer = ganzjährig)"
+                    }
+                },
+                "sections": {
+                    "optional": "Optionale Einstellungen",
+                    "notifications": "Benachrichtigungen"
+                },
+                "actions": {
+                    "add_task": "Aufgabe hinzufügen"
+                },
+                "alerts": {
+                    "required": "Bitte alle Felder ausfüllen",
+                    "error": "Fehler beim Hinzufügen der Aufgabe. Siehe Konsole für Details."
+                }
+            },
+            "current": {
+                "next": "Nächste Fälligkeit",
+                "actions": {
+                    "edit": "Bearbeiten",
+                    "move": "In Gruppe verschieben",
+                    "remove": "Entfernen"
+                },
+                "alerts": {
+                    "complete_success": "\"{title}\" wurde als erledigt markiert. Das nächste Fälligkeitsdatum wurde neu berechnet.",
+                    "complete_error": "Aufgabe konnte nicht als erledigt markiert werden. Details siehe Konsole.",
+                    "remove_error": "Aufgabe konnte nicht entfernt werden. Details in der Konsole."
+                },
+                "filter": {
+                    "search": "Aufgaben durchsuchen...",
+                    "templates": "Vorlagen durchsuchen",
+                    "export": "CSV exportieren",
+                    "clear": "Filter zurücksetzen"
+                }
+            },
+            "groups": {
+                "title": "Gruppen",
+                "fields": {
+                    "new_group": {
+                        "heading": "Neue Gruppe"
+                    }
+                },
+                "actions": {
+                    "create": "Erstellen",
+                    "rename": "Umbenennen",
+                    "delete": "Löschen",
+                    "save": "Speichern"
+                },
+                "empty": "Noch keine Gruppen. Erstellen Sie eine, um Aufgaben zu organisieren.",
+                "confirm_delete": "Gruppe \"{title}\" löschen? Ihre Aufgaben werden in \"Ohne Gruppe\" verschoben.",
+                "alerts": {
+                    "error": "Gruppe konnte nicht erstellt werden. Prüfen Sie die Browserkonsole und die Home-Assistant-Protokolle.",
+                    "exists": "Gruppe \"{title}\" existiert bereits.",
+                    "rename_error": "Gruppe konnte nicht umbenannt werden. Details in der Konsole.",
+                    "delete_error": "Gruppe konnte nicht gelöscht werden. Details in der Konsole."
+                },
+                "confirm_delete_title": "Gruppe löschen"
+            }
+        },
+        "dialog": {
+            "edit_task": {
+                "title": "Aufgabe bearbeiten",
+                "fields": {
+                    "interval_value": {
+                        "heading": "Intervall"
+                    },
+                    "interval_type": {
+                        "heading": "Intervalltyp"
+                    },
+                    "last_performed": {
+                        "heading": "Zuletzt durchgeführt",
+                        "helper": "Leer lassen, um heutiges Datum zu verwenden"
+                    },
+                    "anchor_date": {
+                        "heading": "Ankerdatum",
+                        "helper": "Der Zeitplan wiederholt sich ab diesem festen Datum"
+                    },
+                    "tag": {
+                        "heading": "Tag"
+                    },
+                    "icon": {
+                        "heading": "Symbol"
+                    },
+                    "label": {
+                        "heading": "Bezeichnung(en)"
+                    },
+                    "area": {
+                        "heading": "Bereich"
+                    },
+                    "trigger_type": {
+                        "heading": "Auslöser-Typ"
+                    },
+                    "count_entity_id": {
+                        "heading": "Gezählte Entität"
+                    },
+                    "count_threshold": {
+                        "heading": "Zähl-Schwellwert"
+                    },
+                    "runtime_entity_id": {
+                        "heading": "Laufzeit-Sensor"
+                    },
+                    "runtime_threshold": {
+                        "heading": "Laufzeit-Schwellwert"
+                    },
+                    "title": {
+                        "heading": "Titel"
+                    },
+                    "description": {
+                        "heading": "Beschreibung"
+                    },
+                    "group_id": {
+                        "heading": "Gruppe",
+                        "helper": "Gruppe wählen oder neuen Namen eingeben"
+                    },
+                    "notifications_enabled": {
+                        "heading": "Benachrichtigungen aktivieren"
+                    },
+                    "notification_target": {
+                        "heading": "Benachrichtigungsdienst",
+                        "helper": "Leer lassen, um notify.notify zu verwenden"
+                    },
+                    "notify_when": {
+                        "heading": "Benachrichtigen bei"
+                    },
+                    "notify_days_before_due": {
+                        "heading": "Tage vor Fälligkeit",
+                        "helper": "Optionale Vorab-Erinnerung"
+                    },
+                    "notification_time": {
+                        "heading": "Uhrzeit",
+                        "helper": "Wann automatische Benachrichtigungen gesendet werden"
+                    },
+                    "notification_url": {
+                        "heading": "URL öffnen",
+                        "helper": "Optionale URL für die Aktion „Öffnen“ der Benachrichtigung"
+                    },
+                    "active_months": {
+                        "heading": "Aktive Monate",
+                        "helper": "Saisonale Aufgaben sind nur in diesen Monaten fällig (leer = ganzjährig)"
+                    }
+                },
+                "sections": {
+                    "optional": "Optionale Einstellungen",
+                    "notifications": "Benachrichtigungen",
+                    "history": "Verlauf"
+                },
+                "actions": {
+                    "cancel": "Abbrechen",
+                    "save": "Speichern",
+                    "test_notification": "Testbenachrichtigung senden"
+                },
+                "alerts": {
+                    "error": "Änderungen konnten nicht gespeichert werden. Details in der Konsole.",
+                    "test_error": "Testbenachrichtigung konnte nicht gesendet werden. Details in der Konsole."
+                }
+            },
+            "move_task": {
+                "title": "Aufgabe verschieben",
+                "fields": {
+                    "group_id": {
+                        "heading": "Gruppe"
+                    }
+                },
+                "actions": {
+                    "cancel": "Abbrechen",
+                    "move": "Verschieben"
+                }
+            },
+            "confirm_complete": {
+                "title": "Aufgabe als erledigt markieren",
+                "message": "\"{title}\" als erledigt markieren? Zuletzt durchgeführt wird auf heute zurückgesetzt und das nächste Fälligkeitsdatum wird basierend auf dem Intervall von {interval} neu berechnet.",
+                "message_progress": "\"{title}\" als erledigt markieren? Der Fortschritt ({interval}) beginnt von vorn.",
+                "note_label": "Notiz (optional)",
+                "actions": {
+                    "confirm": "Als erledigt markieren"
+                }
+            },
+            "confirm_remove": {
+                "title": "Aufgabe entfernen",
+                "message": "\"{title}\" entfernen? Dies kann nicht rückgängig gemacht werden.",
+                "actions": {
+                    "confirm": "Entfernen"
+                }
+            },
+            "templates": {
+                "title": "Aufgabenvorlagen",
+                "search": "Vorlagen durchsuchen...",
+                "import_csv": "Aus CSV importieren",
+                "choose_csv": "CSV-Datei auswählen",
+                "csv_hint": "Spalten: title (erforderlich), description, interval_value, interval_type, last_performed (JJJJ-MM-TT), icon, group_id",
+                "csv_empty": "Keine importierbaren Zeilen in der Datei gefunden.",
+                "no_matches": "Keine Vorlagen entsprechen deiner Suche.",
+                "import_count": "{count, plural, one {1 Aufgabe importieren} other {# Aufgaben importieren}}",
+                "imported": "{count, plural, one {1 Aufgabe importiert.} other {# Aufgaben importiert.}}",
+                "import_failed": "Import fehlgeschlagen: {titles}",
+                "preview": {
+                    "title": "Titel",
+                    "interval": "Intervall",
+                    "last_performed": "Zuletzt erledigt",
+                    "group": "Gruppe"
+                }
+            }
+        },
+        "toolbar": {
+            "add_task": "Aufgabe hinzufügen",
+            "manage_groups": "Gruppen verwalten"
+        },
+        "nav": {
+            "all_tasks": "Alle Aufgaben",
+            "done_editing": "Fertig"
+        },
+        "list": {
+            "due_today": "Heute fällig",
+            "days_overdue": "{count, plural, one {1 Tag überfällig} other {# Tage überfällig}}",
+            "days_left": "{count, plural, one {Fällig in 1 Tag} other {Noch # Tage}}",
+            "search": "Aufgaben suchen...",
+            "all_groups": "Alle Gruppen",
+            "overdue": "Überfällig",
+            "due_soon": "Bald fällig",
+            "upcoming": "Anstehend",
+            "no_tasks": "Keine Aufgaben gefunden",
+            "done": "Erledigt",
+            "last_performed": "Zuletzt durchgeführt",
+            "progress": "Fortschritt",
+            "history": "Verlauf",
+            "complete": "Abschließen",
+            "remove": "Entfernen",
+            "all_caught_up": "Alles erledigt",
+            "needs_attention": "{count, plural, one {1 Aufgabe braucht Aufmerksamkeit} other {# Aufgaben brauchen Aufmerksamkeit}}",
+            "done_today": "Heute erledigt",
+            "repeats": "Wiederholung",
+            "next_due": "Wieder fällig am {date}",
+            "clear_search": "Suche löschen",
+            "group_by": "Gruppieren nach",
+            "by_status": "Status"
+        },
+        "empty": {
+            "title": "Noch keine Aufgaben",
+            "message": "Füge deine erste Aufgabe hinzu oder starte mit der Vorlagenbibliothek für typische Aufgaben im Haushalt.",
+            "message_readonly": "Aufgaben, die ein Administrator hinzufügt, erscheinen hier."
+        }
+    },
+    "templates": {
+        "categories": {
+            "hvac": "Heizung & Klima",
+            "plumbing": "Sanitär",
+            "electrical": "Elektrik",
+            "appliances": "Haushaltsgeräte",
+            "interior": "Innenbereich",
+            "exterior": "Außenbereich",
+            "yard": "Garten",
+            "safety": "Sicherheit",
+            "vehicles": "Fahrzeuge"
+        }
+    }
+}

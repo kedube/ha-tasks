@@ -1,0 +1,279 @@
+reset_last_performed:
+  name: Reset Last Performed
+  description: >
+    Resets the 'last_performed' date for a task entity, and updates the 'next_due' date based on the interval.
+  fields:
+    entity_id:
+      name: Entity ID
+      description: The ID of the task entity to reset.
+      required: true
+      selector:
+        entity:
+          domain: binary_sensor
+    performed_date:
+      name: Performed Date
+      description: Optionally specify the date the task was last performed.
+      required: false
+      example: "2025-06-01"
+      selector:
+        date:
+    note:
+      name: Note
+      description: Optional note recorded in the task's completion history.
+      required: false
+      example: "Replaced with MERV 13 filter"
+      selector:
+        text:
+
+increment_count:
+  name: Increment Count
+  description: >
+    Increments the usage counter for a count-based task.
+  fields:
+    entity_id:
+      name: Entity ID
+      description: The ID of the count-based task entity to increment.
+      required: true
+      selector:
+        entity:
+          domain: binary_sensor
+
+reset_count:
+  name: Reset Count
+  description: >
+    Resets the usage counter for a count-based task to zero without marking it as completed.
+  fields:
+    entity_id:
+      name: Entity ID
+      description: The ID of the count-based task entity to reset the counter for.
+      required: true
+      selector:
+        entity:
+          domain: binary_sensor
+
+snooze_task:
+  name: Snooze Task
+  description: >
+    Silences a task's notifications for a number of days without completing it.
+  fields:
+    entity_id:
+      name: Entity ID
+      description: The ID of the task entity to snooze.
+      required: true
+      selector:
+        entity:
+          domain: binary_sensor
+    days:
+      name: Days
+      description: How many days to snooze notifications for (default 1).
+      required: false
+      default: 1
+      selector:
+        number:
+          min: 1
+          mode: box
+
+send_task_notification:
+  name: Send Task Notification
+  description: >
+    Immediately sends the task's notification using its configured notify service, regardless of due state or schedule.
+  fields:
+    entity_id:
+      name: Entity ID
+      description: The ID of the task entity to send a notification for.
+      required: true
+      selector:
+        entity:
+          domain: binary_sensor
+
+create_task:
+  name: Create Task
+  description: >
+    Creates a new task, so automations, scripts, and voice assistants can add tasks without the panel.
+    Optionally returns the new task's ID as a response variable.
+  fields:
+    title:
+      name: Title
+      description: The task title.
+      required: true
+      example: "Replace HVAC filter"
+      selector:
+        text:
+    interval_value:
+      name: Interval
+      description: How many interval units between occurrences.
+      required: true
+      example: 90
+      selector:
+        number:
+          min: 1
+          mode: box
+    interval_type:
+      name: Interval Type
+      description: The interval unit (default days).
+      required: false
+      default: days
+      selector:
+        select:
+          options:
+            - days
+            - weeks
+            - months
+            - years
+    trigger_type:
+      name: Trigger Type
+      description: How the task becomes due (default time-based).
+      required: false
+      default: time
+      selector:
+        select:
+          options:
+            - time
+            - date
+            - count
+            - runtime
+    anchor_date:
+      name: Anchor Date
+      description: Fixed calendar date a "date" task's schedule repeats from.
+      required: false
+      selector:
+        date:
+    last_performed:
+      name: Last Performed
+      description: The date the task was last performed (defaults to today).
+      required: false
+      selector:
+        date:
+    active_months:
+      name: Active Months
+      description: Months (1-12) a seasonal time-based task is active in. Leave empty for year-round.
+      required: false
+      example: "[4, 5, 6, 7, 8, 9, 10]"
+      selector:
+        object:
+    description:
+      name: Description
+      description: Optional task description.
+      required: false
+      selector:
+        text:
+    icon:
+      name: Icon
+      description: Optional MDI icon for the task.
+      required: false
+      example: "mdi:air-filter"
+      selector:
+        icon:
+    group_id:
+      name: Group
+      description: Optional group name (created if it does not exist).
+      required: false
+      selector:
+        text:
+    count_entity_id:
+      name: Counted Entity
+      description: Entity whose on-transitions are counted ("count" tasks).
+      required: false
+      selector:
+        entity:
+    count_threshold:
+      name: Count Threshold
+      description: Activations before a "count" task becomes due.
+      required: false
+      selector:
+        number:
+          min: 1
+          mode: box
+    runtime_entity_id:
+      name: Runtime Sensor
+      description: Numeric sensor whose accumulation is tracked ("runtime" tasks).
+      required: false
+      selector:
+        entity:
+          domain: sensor
+    runtime_threshold:
+      name: Runtime Threshold
+      description: Accumulated amount before a "runtime" task becomes due.
+      required: false
+      selector:
+        number:
+          min: 0.1
+          step: 0.1
+          mode: box
+    labels:
+      name: Labels
+      description: Home Assistant labels applied to the task's entity.
+      required: false
+      selector:
+        label:
+          multiple: true
+    tag_id:
+      name: NFC Tag
+      description: Tag entity whose scan marks the task complete.
+      required: false
+      selector:
+        entity:
+          domain: tag
+    area_id:
+      name: Area
+      description: Area assigned to the task's entity.
+      required: false
+      selector:
+        area:
+    notifications_enabled:
+      name: Enable Notifications
+      description: Send per-task notifications for this task.
+      required: false
+      selector:
+        boolean:
+    notification_target:
+      name: Notify Service
+      description: Notify service to use (e.g. notify.mobile_app_phone); empty uses notify.notify.
+      required: false
+      example: "notify.mobile_app_phone"
+      selector:
+        text:
+    notify_when:
+      name: Notify When
+      description: Which due states send a notification.
+      required: false
+      selector:
+        select:
+          options:
+            - due
+            - overdue
+            - due_and_overdue
+    notify_days_before_due:
+      name: Days Before Due
+      description: Optional due-soon reminder offset for dated tasks.
+      required: false
+      selector:
+        number:
+          min: 1
+          mode: box
+    notification_time:
+      name: Notification Time
+      description: Time of day automatic notifications are sent (default 09:00).
+      required: false
+      selector:
+        time:
+    notification_url:
+      name: Open URL
+      description: Optional http(s) URL for the notification's Open action.
+      required: false
+      selector:
+        text:
+
+mark_overdue:
+  name: Mark Overdue
+  description: >
+    Forces a task into the due state by backdating its trigger progress — useful for testing due-state automations and notifications.
+    Fails for tasks that cannot currently be due: a fixed-date task whose first occurrence is still in the future, a seasonal task outside its active months, or a runtime task whose sensor is unavailable.
+  fields:
+    entity_id:
+      name: Entity ID
+      description: The ID of the task entity to mark overdue.
+      required: true
+      selector:
+        entity:
+          domain: binary_sensor

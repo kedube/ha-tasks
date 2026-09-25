@@ -1,0 +1,46 @@
+{
+  "config": {
+    "flow_title": "Tasks",
+    "step": {
+      "user": {
+        "title": "Configurer Tasks",
+        "description": "Configurez l'intégration Tasks.",
+        "data": {
+          "admin_only": "Restreindre le panneau aux administrateurs uniquement",
+          "sidebar_title": "Le nom affiché dans la barre latérale pour cette intégration."
+        },
+        "data_description": {
+          "admin_only": "Si désactivé, les autres utilisateurs peuvent ouvrir le panneau pour consulter les tâches et les marquer comme terminées ; l'ajout, la modification et la suppression de tâches restent réservés aux administrateurs."
+        }
+      }
+    },
+    "abort": {
+      "single_instance_allowed": "Une seule instance de Tasks est autorisée."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "admin_only": "Restreindre le panneau aux administrateurs uniquement",
+          "sidebar_title": "Le nom affiché dans la barre latérale pour cette intégration.",
+          "due_soon_days": "Délai « Échéance proche » dans le panneau (jours)",
+          "max_history_entries": "Entrées d'historique conservées par tâche (0 = illimité)"
+        },
+        "data_description": {
+          "admin_only": "Si désactivé, les autres utilisateurs peuvent ouvrir le panneau pour consulter les tâches et les marquer comme terminées ; l'ajout, la modification et la suppression de tâches restent réservés aux administrateurs."
+        }
+      }
+    }
+  },
+  "issues": {
+    "missing_watched_entity": {
+      "title": "L'entité surveillée pour \"{title}\" est introuvable",
+      "description": "La tâche \"{title}\" surveille `{entity_id}`, mais cette entité n'existe plus. Le compteur ou la progression de fonctionnement de la tâche n'avancera pas tant que l'entité ne sera pas de retour ou que la tâche ne sera pas mise à jour pour surveiller une autre entité."
+    },
+    "missing_notify_service": {
+      "title": "Le service de notification pour \"{title}\" est introuvable",
+      "description": "La tâche \"{title}\" envoie des notifications via `{service}`, mais ce service n'est pas disponible. Les notifications pour cette tâche échoueront tant que le service ne sera pas de retour ou que la tâche ne sera pas mise à jour pour utiliser un autre service de notification."
+    }
+  }
+}

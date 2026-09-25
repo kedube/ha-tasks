@@ -1,0 +1,375 @@
+{
+    "common": {
+        "loading": "Chargement...",
+        "none": "Aucun",
+        "no_tasks": "Aucune tâche trouvée.",
+        "ungrouped": "Sans groupe",
+        "cancel": "Annuler",
+        "invalid_date": "Date saisie non valide."
+    },
+    "intervals": {
+        "day": "Jour",
+        "days": "Jours",
+        "week": "Semaine",
+        "weeks": "Semaines",
+        "month": "Mois",
+        "months": "Mois",
+        "year": "Année",
+        "years": "Années",
+        "every_uses": "Toutes les {value} utilisations",
+        "every_runtime": "Tous les {value} de fonctionnement"
+    },
+    "trigger_types": {
+        "time": "Basé sur le temps",
+        "date": "Date fixe",
+        "count": "Basé sur un compteur",
+        "runtime": "Basé sur le fonctionnement"
+    },
+    "notifications": {
+        "when": {
+            "due": "À échéance",
+            "overdue": "En retard",
+            "due_and_overdue": "À échéance et en retard"
+        }
+    },
+    "card": {
+        "add_task": {
+            "added": "\"{title}\" ajoutée.",
+            "admin_only": "Seuls les administrateurs peuvent ajouter des tâches."
+        }
+    },
+    "panel": {
+        "cards": {
+            "new": {
+                "title": "Créer une nouvelle tâche",
+                "fields": {
+                    "title": {
+                        "heading": "Titre de la tâche"
+                    },
+                    "interval_value": {
+                        "heading": "Intervalle"
+                    },
+                    "interval_type": {
+                        "heading": "Type d'intervalle"
+                    },
+                    "last_performed": {
+                        "heading": "Dernière exécution",
+                        "helper": "Laissez vide pour utiliser aujourd'hui"
+                    },
+                    "anchor_date": {
+                        "heading": "Date d'ancrage",
+                        "helper": "Le planning se répète à partir de cette date fixe"
+                    },
+                    "tag": {
+                        "heading": "Tag"
+                    },
+                    "icon": {
+                        "heading": "Icône"
+                    },
+                    "label": {
+                        "heading": "Libellé(s)"
+                    },
+                    "area": {
+                        "heading": "Pièce"
+                    },
+                    "description": {
+                        "heading": "Description"
+                    },
+                    "trigger_type": {
+                        "heading": "Type de déclencheur"
+                    },
+                    "count_entity_id": {
+                        "heading": "Entité comptée"
+                    },
+                    "count_threshold": {
+                        "heading": "Seuil de comptage"
+                    },
+                    "runtime_entity_id": {
+                        "heading": "Capteur de fonctionnement"
+                    },
+                    "runtime_threshold": {
+                        "heading": "Seuil de fonctionnement"
+                    },
+                    "group_id": {
+                        "heading": "Groupe",
+                        "helper": "Choisissez un groupe ou saisissez un nouveau nom"
+                    },
+                    "notifications_enabled": {
+                        "heading": "Activer les notifications"
+                    },
+                    "notification_target": {
+                        "heading": "Service de notification",
+                        "helper": "Laissez vide pour utiliser notify.notify"
+                    },
+                    "notify_when": {
+                        "heading": "Notifier quand"
+                    },
+                    "notify_days_before_due": {
+                        "heading": "Jours avant l'échéance",
+                        "helper": "Décalage facultatif du rappel d'échéance proche"
+                    },
+                    "notification_time": {
+                        "heading": "Heure de la journée",
+                        "helper": "Heure d'envoi des notifications automatiques"
+                    },
+                    "notification_url": {
+                        "heading": "URL à ouvrir",
+                        "helper": "URL facultative pour l'action Ouvrir de la notification"
+                    },
+                    "active_months": {
+                        "heading": "Mois actifs",
+                        "helper": "Les tâches saisonnières ne sont dues que pendant ces mois (vide = toute l'année)"
+                    }
+                },
+                "sections": {
+                    "optional": "Paramètres facultatifs",
+                    "notifications": "Notifications"
+                },
+                "actions": {
+                    "add_task": "Ajouter la tâche"
+                },
+                "alerts": {
+                    "required": "Veuillez remplir tous les champs",
+                    "error": "Erreur lors de l'ajout de la tâche. Consultez la console pour plus de détails."
+                }
+            },
+            "current": {
+                "next": "Prochaine échéance",
+                "actions": {
+                    "edit": "Modifier",
+                    "move": "Déplacer vers un groupe",
+                    "remove": "Supprimer"
+                },
+                "alerts": {
+                    "complete_success": "\"{title}\" marquée comme terminée. La prochaine échéance a été recalculée.",
+                    "complete_error": "Impossible de marquer la tâche comme terminée. Consultez la console pour plus de détails.",
+                    "remove_error": "Impossible de supprimer la tâche. Consultez la console pour plus de détails."
+                },
+                "filter": {
+                    "search": "Rechercher des tâches...",
+                    "templates": "Parcourir les modèles",
+                    "export": "Exporter en CSV",
+                    "clear": "Effacer les filtres"
+                }
+            },
+            "groups": {
+                "title": "Groupes",
+                "fields": {
+                    "new_group": {
+                        "heading": "Nouveau groupe"
+                    }
+                },
+                "actions": {
+                    "create": "Créer",
+                    "rename": "Renommer",
+                    "delete": "Supprimer",
+                    "save": "Enregistrer"
+                },
+                "empty": "Aucun groupe pour le moment. Créez-en un pour organiser vos tâches.",
+                "confirm_delete": "Supprimer le groupe \"{title}\" ? Ses tâches seront déplacées vers Sans groupe.",
+                "alerts": {
+                    "error": "Impossible de créer le groupe. Vérifiez la console du navigateur et les journaux de Home Assistant.",
+                    "exists": "Le groupe \"{title}\" existe déjà.",
+                    "rename_error": "Impossible de renommer le groupe. Consultez la console pour plus de détails.",
+                    "delete_error": "Impossible de supprimer le groupe. Consultez la console pour plus de détails."
+                },
+                "confirm_delete_title": "Supprimer le groupe"
+            }
+        },
+        "dialog": {
+            "edit_task": {
+                "title": "Modifier la tâche",
+                "fields": {
+                    "interval_value": {
+                        "heading": "Intervalle"
+                    },
+                    "interval_type": {
+                        "heading": "Type d'intervalle"
+                    },
+                    "last_performed": {
+                        "heading": "Dernière exécution",
+                        "helper": "Laissez vide pour utiliser aujourd'hui"
+                    },
+                    "anchor_date": {
+                        "heading": "Date d'ancrage",
+                        "helper": "Le planning se répète à partir de cette date fixe"
+                    },
+                    "tag": {
+                        "heading": "Tag"
+                    },
+                    "icon": {
+                        "heading": "Icône"
+                    },
+                    "label": {
+                        "heading": "Libellé(s)"
+                    },
+                    "area": {
+                        "heading": "Pièce"
+                    },
+                    "trigger_type": {
+                        "heading": "Type de déclencheur"
+                    },
+                    "count_entity_id": {
+                        "heading": "Entité comptée"
+                    },
+                    "count_threshold": {
+                        "heading": "Seuil de comptage"
+                    },
+                    "runtime_entity_id": {
+                        "heading": "Capteur de fonctionnement"
+                    },
+                    "runtime_threshold": {
+                        "heading": "Seuil de fonctionnement"
+                    },
+                    "title": {
+                        "heading": "Titre"
+                    },
+                    "description": {
+                        "heading": "Description"
+                    },
+                    "group_id": {
+                        "heading": "Groupe",
+                        "helper": "Choisissez un groupe ou saisissez un nouveau nom"
+                    },
+                    "notifications_enabled": {
+                        "heading": "Activer les notifications"
+                    },
+                    "notification_target": {
+                        "heading": "Service de notification",
+                        "helper": "Laissez vide pour utiliser notify.notify"
+                    },
+                    "notify_when": {
+                        "heading": "Notifier quand"
+                    },
+                    "notify_days_before_due": {
+                        "heading": "Jours avant l'échéance",
+                        "helper": "Décalage facultatif du rappel d'échéance proche"
+                    },
+                    "notification_time": {
+                        "heading": "Heure de la journée",
+                        "helper": "Heure d'envoi des notifications automatiques"
+                    },
+                    "notification_url": {
+                        "heading": "URL à ouvrir",
+                        "helper": "URL facultative pour l'action Ouvrir de la notification"
+                    },
+                    "active_months": {
+                        "heading": "Mois actifs",
+                        "helper": "Les tâches saisonnières ne sont dues que pendant ces mois (vide = toute l'année)"
+                    }
+                },
+                "sections": {
+                    "optional": "Paramètres facultatifs",
+                    "notifications": "Notifications",
+                    "history": "Historique"
+                },
+                "actions": {
+                    "cancel": "Annuler",
+                    "save": "Enregistrer",
+                    "test_notification": "Envoyer une notification de test"
+                },
+                "alerts": {
+                    "error": "Impossible d'enregistrer les modifications. Consultez la console pour plus de détails.",
+                    "test_error": "Impossible d'envoyer la notification de test. Consultez la console pour plus de détails."
+                }
+            },
+            "move_task": {
+                "title": "Déplacer la tâche",
+                "fields": {
+                    "group_id": {
+                        "heading": "Groupe"
+                    }
+                },
+                "actions": {
+                    "cancel": "Annuler",
+                    "move": "Déplacer"
+                }
+            },
+            "confirm_complete": {
+                "title": "Marquer la tâche comme terminée",
+                "message": "Marquer \"{title}\" comme terminée ? La dernière exécution sera réinitialisée à aujourd'hui et la prochaine échéance sera recalculée en fonction de l'intervalle {interval}.",
+                "message_progress": "Marquer \"{title}\" comme terminée ? La progression ({interval}) repartira de zéro.",
+                "note_label": "Note (facultatif)",
+                "actions": {
+                    "confirm": "Marquer comme terminée"
+                }
+            },
+            "confirm_remove": {
+                "title": "Supprimer la tâche",
+                "message": "Supprimer \"{title}\" ? Cette action est irréversible.",
+                "actions": {
+                    "confirm": "Supprimer"
+                }
+            },
+            "templates": {
+                "title": "Modèles de tâches",
+                "search": "Rechercher des modèles...",
+                "import_csv": "Importer depuis un CSV",
+                "choose_csv": "Choisir un fichier CSV",
+                "csv_hint": "Colonnes : title (obligatoire), description, interval_value, interval_type, last_performed (AAAA-MM-JJ), icon, group_id",
+                "csv_empty": "Aucune ligne importable trouvée dans le fichier.",
+                "no_matches": "Aucun modèle ne correspond à votre recherche.",
+                "import_count": "{count, plural, one {Importer 1 tâche} other {Importer # tâches}}",
+                "imported": "{count, plural, one {1 tâche importée.} other {# tâches importées.}}",
+                "import_failed": "Échec de l'importation : {titles}",
+                "preview": {
+                    "title": "Titre",
+                    "interval": "Intervalle",
+                    "last_performed": "Dernière exécution",
+                    "group": "Groupe"
+                }
+            }
+        },
+        "toolbar": {
+            "add_task": "Ajouter une tâche",
+            "manage_groups": "Gérer les groupes"
+        },
+        "nav": {
+            "all_tasks": "Toutes les tâches",
+            "done_editing": "Terminé"
+        },
+        "list": {
+            "due_today": "Échéance aujourd'hui",
+            "days_overdue": "{count, plural, one {1 jour de retard} other {# jours de retard}}",
+            "days_left": "{count, plural, one {Échéance dans 1 jour} other {# jours restants}}",
+            "search": "Rechercher des tâches...",
+            "all_groups": "Tous les groupes",
+            "overdue": "En retard",
+            "due_soon": "Échéance proche",
+            "upcoming": "À venir",
+            "no_tasks": "Aucune tâche trouvée",
+            "done": "Terminé",
+            "last_performed": "Dernière exécution",
+            "progress": "Progression",
+            "history": "Historique",
+            "complete": "Terminer",
+            "remove": "Supprimer",
+            "all_caught_up": "Tout est à jour",
+            "needs_attention": "{count, plural, one {1 tâche requiert votre attention} other {# tâches requièrent votre attention}}",
+            "done_today": "Fait aujourd'hui",
+            "repeats": "Répétition",
+            "next_due": "Prochaine échéance : {date}",
+            "clear_search": "Effacer la recherche",
+            "group_by": "Regrouper par",
+            "by_status": "Statut"
+        },
+        "empty": {
+            "title": "Aucune tâche pour l'instant",
+            "message": "Ajoutez votre première tâche ou partez de la bibliothèque de modèles de tâches ménagères courantes.",
+            "message_readonly": "Les tâches ajoutées par un administrateur apparaîtront ici."
+        }
+    },
+    "templates": {
+        "categories": {
+            "hvac": "CVC",
+            "plumbing": "Plomberie",
+            "electrical": "Électricité",
+            "appliances": "Électroménager",
+            "interior": "Intérieur",
+            "exterior": "Extérieur",
+            "yard": "Jardin",
+            "safety": "Sécurité",
+            "vehicles": "Véhicules"
+        }
+    }
+}

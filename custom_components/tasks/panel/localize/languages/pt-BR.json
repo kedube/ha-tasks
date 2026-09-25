@@ -1,0 +1,375 @@
+{
+    "common": {
+        "loading": "Carregando...",
+        "none": "Nenhum",
+        "no_tasks": "Nenhuma tarefa encontrada.",
+        "ungrouped": "Sem grupo",
+        "cancel": "Cancelar",
+        "invalid_date": "Data inválida."
+    },
+    "intervals": {
+        "day": "Dia",
+        "days": "Dias",
+        "week": "Semana",
+        "weeks": "Semanas",
+        "month": "Mês",
+        "months": "Meses",
+        "year": "Ano",
+        "years": "Anos",
+        "every_uses": "A cada {value} usos",
+        "every_runtime": "A cada {value} de tempo de uso"
+    },
+    "trigger_types": {
+        "time": "Por tempo",
+        "date": "Data fixa",
+        "count": "Por contagem",
+        "runtime": "Por tempo de uso"
+    },
+    "notifications": {
+        "when": {
+            "due": "No vencimento",
+            "overdue": "Em atraso",
+            "due_and_overdue": "No vencimento e em atraso"
+        }
+    },
+    "card": {
+        "add_task": {
+            "added": "\"{title}\" adicionada.",
+            "admin_only": "Somente administradores podem adicionar tarefas."
+        }
+    },
+    "panel": {
+        "cards": {
+            "new": {
+                "title": "Criar nova tarefa",
+                "fields": {
+                    "title": {
+                        "heading": "Título da tarefa"
+                    },
+                    "interval_value": {
+                        "heading": "Intervalo"
+                    },
+                    "interval_type": {
+                        "heading": "Tipo de intervalo"
+                    },
+                    "last_performed": {
+                        "heading": "Última execução",
+                        "helper": "Deixe em branco para usar hoje"
+                    },
+                    "anchor_date": {
+                        "heading": "Data de referência",
+                        "helper": "O agendamento se repete a partir desta data fixa"
+                    },
+                    "tag": {
+                        "heading": "Tag"
+                    },
+                    "icon": {
+                        "heading": "Ícone"
+                    },
+                    "label": {
+                        "heading": "Etiqueta(s)"
+                    },
+                    "area": {
+                        "heading": "Área"
+                    },
+                    "description": {
+                        "heading": "Descrição"
+                    },
+                    "trigger_type": {
+                        "heading": "Tipo de gatilho"
+                    },
+                    "count_entity_id": {
+                        "heading": "Entidade contada"
+                    },
+                    "count_threshold": {
+                        "heading": "Limite de contagem"
+                    },
+                    "runtime_entity_id": {
+                        "heading": "Sensor de tempo de uso"
+                    },
+                    "runtime_threshold": {
+                        "heading": "Limite de tempo de uso"
+                    },
+                    "group_id": {
+                        "heading": "Grupo",
+                        "helper": "Escolha um grupo ou digite um novo nome"
+                    },
+                    "notifications_enabled": {
+                        "heading": "Ativar notificações"
+                    },
+                    "notification_target": {
+                        "heading": "Serviço de notificação",
+                        "helper": "Deixe em branco para usar notify.notify"
+                    },
+                    "notify_when": {
+                        "heading": "Notificar quando"
+                    },
+                    "notify_days_before_due": {
+                        "heading": "Dias antes do vencimento",
+                        "helper": "Antecedência opcional do lembrete de vencimento"
+                    },
+                    "notification_time": {
+                        "heading": "Horário do dia",
+                        "helper": "Quando as notificações automáticas são enviadas"
+                    },
+                    "notification_url": {
+                        "heading": "URL para abrir",
+                        "helper": "URL opcional para a ação Abrir da notificação"
+                    },
+                    "active_months": {
+                        "heading": "Meses ativos",
+                        "helper": "Tarefas sazonais só vencem nesses meses (vazio = o ano todo)"
+                    }
+                },
+                "sections": {
+                    "optional": "Configurações opcionais",
+                    "notifications": "Notificações"
+                },
+                "actions": {
+                    "add_task": "Adicionar tarefa"
+                },
+                "alerts": {
+                    "required": "Preencha todos os campos",
+                    "error": "Erro ao adicionar a tarefa. Veja o console para detalhes."
+                }
+            },
+            "current": {
+                "next": "Próximo vencimento",
+                "actions": {
+                    "edit": "Editar",
+                    "move": "Mover para grupo",
+                    "remove": "Remover"
+                },
+                "alerts": {
+                    "complete_success": "\"{title}\" marcada como concluída. O próximo vencimento foi recalculado.",
+                    "complete_error": "Falha ao marcar a tarefa como concluída. Veja o console para detalhes.",
+                    "remove_error": "Falha ao remover a tarefa. Veja o console para detalhes."
+                },
+                "filter": {
+                    "search": "Pesquisar tarefas...",
+                    "templates": "Explorar modelos",
+                    "export": "Exportar CSV",
+                    "clear": "Limpar filtros"
+                }
+            },
+            "groups": {
+                "title": "Grupos",
+                "fields": {
+                    "new_group": {
+                        "heading": "Novo grupo"
+                    }
+                },
+                "actions": {
+                    "create": "Criar",
+                    "rename": "Renomear",
+                    "delete": "Excluir",
+                    "save": "Salvar"
+                },
+                "empty": "Nenhum grupo ainda. Crie um para organizar suas tarefas.",
+                "confirm_delete": "Excluir o grupo \"{title}\"? Suas tarefas irão para Sem grupo.",
+                "alerts": {
+                    "error": "Falha ao criar o grupo. Verifique o console do navegador e os logs do Home Assistant.",
+                    "exists": "O grupo \"{title}\" já existe.",
+                    "rename_error": "Falha ao renomear o grupo. Veja o console para detalhes.",
+                    "delete_error": "Falha ao excluir o grupo. Veja o console para detalhes."
+                },
+                "confirm_delete_title": "Excluir grupo"
+            }
+        },
+        "dialog": {
+            "edit_task": {
+                "title": "Editar tarefa",
+                "fields": {
+                    "interval_value": {
+                        "heading": "Intervalo"
+                    },
+                    "interval_type": {
+                        "heading": "Tipo de intervalo"
+                    },
+                    "last_performed": {
+                        "heading": "Última execução",
+                        "helper": "Deixe em branco para usar hoje"
+                    },
+                    "anchor_date": {
+                        "heading": "Data de referência",
+                        "helper": "O agendamento se repete a partir desta data fixa"
+                    },
+                    "tag": {
+                        "heading": "Tag"
+                    },
+                    "icon": {
+                        "heading": "Ícone"
+                    },
+                    "label": {
+                        "heading": "Etiqueta(s)"
+                    },
+                    "area": {
+                        "heading": "Área"
+                    },
+                    "trigger_type": {
+                        "heading": "Tipo de gatilho"
+                    },
+                    "count_entity_id": {
+                        "heading": "Entidade contada"
+                    },
+                    "count_threshold": {
+                        "heading": "Limite de contagem"
+                    },
+                    "runtime_entity_id": {
+                        "heading": "Sensor de tempo de uso"
+                    },
+                    "runtime_threshold": {
+                        "heading": "Limite de tempo de uso"
+                    },
+                    "title": {
+                        "heading": "Título"
+                    },
+                    "description": {
+                        "heading": "Descrição"
+                    },
+                    "group_id": {
+                        "heading": "Grupo",
+                        "helper": "Escolha um grupo ou digite um novo nome"
+                    },
+                    "notifications_enabled": {
+                        "heading": "Ativar notificações"
+                    },
+                    "notification_target": {
+                        "heading": "Serviço de notificação",
+                        "helper": "Deixe em branco para usar notify.notify"
+                    },
+                    "notify_when": {
+                        "heading": "Notificar quando"
+                    },
+                    "notify_days_before_due": {
+                        "heading": "Dias antes do vencimento",
+                        "helper": "Antecedência opcional do lembrete de vencimento"
+                    },
+                    "notification_time": {
+                        "heading": "Horário do dia",
+                        "helper": "Quando as notificações automáticas são enviadas"
+                    },
+                    "notification_url": {
+                        "heading": "URL para abrir",
+                        "helper": "URL opcional para a ação Abrir da notificação"
+                    },
+                    "active_months": {
+                        "heading": "Meses ativos",
+                        "helper": "Tarefas sazonais só vencem nesses meses (vazio = o ano todo)"
+                    }
+                },
+                "sections": {
+                    "optional": "Configurações opcionais",
+                    "notifications": "Notificações",
+                    "history": "Histórico"
+                },
+                "actions": {
+                    "cancel": "Cancelar",
+                    "save": "Salvar",
+                    "test_notification": "Enviar notificação de teste"
+                },
+                "alerts": {
+                    "error": "Falha ao salvar as alterações. Veja o console para detalhes.",
+                    "test_error": "Falha ao enviar a notificação de teste. Veja o console para detalhes."
+                }
+            },
+            "move_task": {
+                "title": "Mover tarefa",
+                "fields": {
+                    "group_id": {
+                        "heading": "Grupo"
+                    }
+                },
+                "actions": {
+                    "cancel": "Cancelar",
+                    "move": "Mover"
+                }
+            },
+            "confirm_complete": {
+                "title": "Marcar tarefa como concluída",
+                "message": "Marcar \"{title}\" como concluída? A última execução será redefinida para hoje e o próximo vencimento será recalculado com base no intervalo de {interval}.",
+                "message_progress": "Marcar \"{title}\" como concluída? O progresso ({interval}) recomeçará do zero.",
+                "note_label": "Nota (opcional)",
+                "actions": {
+                    "confirm": "Marcar como concluída"
+                }
+            },
+            "confirm_remove": {
+                "title": "Remover tarefa",
+                "message": "Remover \"{title}\"? Isso não pode ser desfeito.",
+                "actions": {
+                    "confirm": "Remover"
+                }
+            },
+            "templates": {
+                "title": "Modelos de tarefas",
+                "search": "Pesquisar modelos...",
+                "import_csv": "Importar de CSV",
+                "choose_csv": "Escolher arquivo CSV",
+                "csv_hint": "Colunas: title (obrigatória), description, interval_value, interval_type, last_performed (AAAA-MM-DD), icon, group_id",
+                "csv_empty": "Nenhuma linha importável encontrada no arquivo.",
+                "no_matches": "Nenhum modelo corresponde à sua pesquisa.",
+                "import_count": "{count, plural, one {Importar 1 tarefa} other {Importar # tarefas}}",
+                "imported": "{count, plural, one {1 tarefa importada.} other {# tarefas importadas.}}",
+                "import_failed": "Falha ao importar: {titles}",
+                "preview": {
+                    "title": "Título",
+                    "interval": "Intervalo",
+                    "last_performed": "Última execução",
+                    "group": "Grupo"
+                }
+            }
+        },
+        "toolbar": {
+            "add_task": "Adicionar tarefa",
+            "manage_groups": "Gerenciar grupos"
+        },
+        "nav": {
+            "all_tasks": "Todas as tarefas",
+            "done_editing": "Concluir"
+        },
+        "list": {
+            "due_today": "Vence hoje",
+            "days_overdue": "{count, plural, one {1 dia de atraso} other {# dias de atraso}}",
+            "days_left": "{count, plural, one {Vence em 1 dia} other {Faltam # dias}}",
+            "search": "Pesquisar tarefas...",
+            "all_groups": "Todos os grupos",
+            "overdue": "Atrasadas",
+            "due_soon": "Vence em breve",
+            "upcoming": "Próximas",
+            "no_tasks": "Nenhuma tarefa encontrada",
+            "done": "Concluídas",
+            "last_performed": "Última execução",
+            "progress": "Progresso",
+            "history": "Histórico",
+            "complete": "Concluir",
+            "remove": "Remover",
+            "all_caught_up": "Tudo em dia",
+            "needs_attention": "{count, plural, one {1 tarefa precisa de atenção} other {# tarefas precisam de atenção}}",
+            "done_today": "Feito hoje",
+            "repeats": "Repete",
+            "next_due": "Próximo vencimento: {date}",
+            "clear_search": "Limpar busca",
+            "group_by": "Agrupar por",
+            "by_status": "Status"
+        },
+        "empty": {
+            "title": "Nenhuma tarefa ainda",
+            "message": "Adicione sua primeira tarefa ou comece pela biblioteca de modelos de tarefas domésticas comuns.",
+            "message_readonly": "As tarefas adicionadas por um administrador aparecerão aqui."
+        }
+    },
+    "templates": {
+        "categories": {
+            "hvac": "Climatização",
+            "plumbing": "Hidráulica",
+            "electrical": "Elétrica",
+            "appliances": "Eletrodomésticos",
+            "interior": "Interior",
+            "exterior": "Exterior",
+            "yard": "Jardim",
+            "safety": "Segurança",
+            "vehicles": "Veículos"
+        }
+    }
+}

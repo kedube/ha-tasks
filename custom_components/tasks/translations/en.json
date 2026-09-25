@@ -1,0 +1,46 @@
+{
+  "config": {
+    "flow_title": "Tasks",
+    "step": {
+      "user": {
+        "title": "Configure Tasks",
+        "description": "Set up the Tasks integration.",
+        "data": {
+          "admin_only": "Restrict panel to admins only",
+          "sidebar_title": "The name shown in the sidebar for this integration."
+        },
+        "data_description": {
+          "admin_only": "When off, other users can open the panel to view tasks and mark them complete; adding, editing, and removing tasks stays with admins."
+        }
+      }
+    },
+    "abort": {
+      "single_instance_allowed": "Only a single instance of Tasks is allowed."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "admin_only": "Restrict panel to admins only",
+          "sidebar_title": "The name shown in the sidebar for this integration.",
+          "due_soon_days": "\"Due soon\" window in the panel (days)",
+          "max_history_entries": "Completion-history entries kept per task (0 = unlimited)"
+        },
+        "data_description": {
+          "admin_only": "When off, other users can open the panel to view tasks and mark them complete; adding, editing, and removing tasks stays with admins."
+        }
+      }
+    }
+  },
+  "issues": {
+    "missing_watched_entity": {
+      "title": "Watched entity for \"{title}\" is missing",
+      "description": "The task \"{title}\" watches `{entity_id}`, but that entity no longer exists. The task's counter or runtime progress will not advance until the entity returns or the task is updated to watch a different entity."
+    },
+    "missing_notify_service": {
+      "title": "Notify service for \"{title}\" is missing",
+      "description": "The task \"{title}\" sends notifications via `{service}`, but that service is not available. Notifications for this task will fail until the service returns or the task is updated to use a different notify service."
+    }
+  }
+}

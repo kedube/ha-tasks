@@ -1,0 +1,5 @@
+pytest-homeassistant-custom-component==0.13.316
+pytest-cov==7.0.0
+# Required because the integration declares panel_custom (-> frontend) as a
+# dependency, and the frontend component imports hass_frontend at setup.
+home-assistant-frontend==20260128.6

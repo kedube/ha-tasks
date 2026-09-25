@@ -1,0 +1,26 @@
+# artifacts
+__pycache__
+.pytest*
+*.egg-info
+*/build/*
+*/dist/*
+
+# Typescript
+custom_components/tasks/panel/node_modules
+
+
+# misc
+.coverage
+.vscode
+*.code-workspace
+coverage.xml
+.ruff_cache
+*.zip
+
+
+# Home Assistant configuration
+config/*
+!config/configuration.yaml
+!config/dashboards/
+.venv*
+.DS_Store

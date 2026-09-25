@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+
+cd "$(dirname "$0")/.."
+
+CONFIG_DIR="${PWD}/config"
+CC_SRC="${PWD}/custom_components"
+CC_DST="${CONFIG_DIR}/custom_components"
+VENV_DIR="${PWD}/.venv"
+
+if [[ ! -x "${VENV_DIR}/bin/python" ]]; then
+    echo "ERROR: venv not found at ${VENV_DIR}"
+    exit 1
+fi
+
+# Invoke via the venv python rather than the hass entrypoint: entrypoint
+# shebangs embed the venv's absolute path and break if the repo is moved.
+HASS=("${VENV_DIR}/bin/python" -m homeassistant)
+
+if [[ ! -d "${CONFIG_DIR}" ]]; then
+    mkdir -p "${CONFIG_DIR}"
+    "${HASS[@]}" --config "${CONFIG_DIR}" --script ensure_config
+fi
+
+if [[ -L "${CC_DST}" ]]; then
+    echo "custom_components symlink already exists"
+elif [[ -d "${CC_DST}" ]]; then
+    echo "WARNING: ${CC_DST} exists and is not a symlink. Skipping link."
+else
+    ln -s "${CC_SRC}" "${CC_DST}"
+    echo "Created symlink: ${CC_DST} -> ${CC_SRC}"
+fi
+
+export PYTHONPATH="${PYTHONPATH}:${CC_SRC}"
+
+"${HASS[@]}" --config "${CONFIG_DIR}" --debug

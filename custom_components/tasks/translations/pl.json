@@ -1,0 +1,46 @@
+{
+  "config": {
+    "flow_title": "Tasks",
+    "step": {
+      "user": {
+        "title": "Konfiguracja Tasks",
+        "description": "Skonfiguruj integrację Tasks.",
+        "data": {
+          "admin_only": "Ogranicz panel tylko do administratorów",
+          "sidebar_title": "Nazwa wyświetlana na pasku bocznym dla tej integracji."
+        },
+        "data_description": {
+          "admin_only": "Po wyłączeniu inni użytkownicy mogą otworzyć panel, aby przeglądać zadania i oznaczać je jako wykonane; dodawanie, edytowanie i usuwanie zadań pozostaje zarezerwowane dla administratorów."
+        }
+      }
+    },
+    "abort": {
+      "single_instance_allowed": "Dozwolona jest tylko jedna instancja Tasks."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "admin_only": "Ogranicz panel tylko do administratorów",
+          "sidebar_title": "Nazwa wyświetlana na pasku bocznym dla tej integracji.",
+          "due_soon_days": "Okno „Wkrótce termin” w panelu (dni)",
+          "max_history_entries": "Liczba wpisów historii na zadanie (0 = bez limitu)"
+        },
+        "data_description": {
+          "admin_only": "Po wyłączeniu inni użytkownicy mogą otworzyć panel, aby przeglądać zadania i oznaczać je jako wykonane; dodawanie, edytowanie i usuwanie zadań pozostaje zarezerwowane dla administratorów."
+        }
+      }
+    }
+  },
+  "issues": {
+    "missing_watched_entity": {
+      "title": "Brak obserwowanej encji dla \"{title}\"",
+      "description": "Zadanie \"{title}\" obserwuje `{entity_id}`, ale ta encja już nie istnieje. Licznik lub postęp czasu pracy zadania nie będzie się zwiększać, dopóki encja nie wróci lub zadanie nie zostanie zaktualizowane, aby obserwować inną encję."
+    },
+    "missing_notify_service": {
+      "title": "Brak usługi powiadomień dla \"{title}\"",
+      "description": "Zadanie \"{title}\" wysyła powiadomienia przez `{service}`, ale ta usługa jest niedostępna. Powiadomienia dla tego zadania będą kończyć się niepowodzeniem, dopóki usługa nie wróci lub zadanie nie zostanie zaktualizowane, aby używać innej usługi powiadomień."
+    }
+  }
+}

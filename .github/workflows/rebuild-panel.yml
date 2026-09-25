@@ -1,0 +1,65 @@
+name: Rebuild panel bundle
+
+# Dependabot bumps the panel's npm dependencies but cannot rebuild the
+# committed dist/main.js, so CI's bundle drift check would fail its PRs.
+# This workflow rebuilds the bundle on dependabot's branch and pushes the
+# result. Note: the push uses GITHUB_TOKEN, which does not retrigger CI on
+# the new commit — re-run CI from the PR (or push an empty commit) if you
+# need fresh checks on the rebuilt bundle before merging.
+
+on:
+  pull_request:
+    paths:
+      - custom_components/tasks/panel/package.json
+      - custom_components/tasks/panel/package-lock.json
+
+permissions:
+  contents: write
+
+concurrency:
+  group: rebuild-panel-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  rebuild:
+    name: Rebuild dist on dependabot PR
+    if: github.actor == 'dependabot[bot]' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: custom_components/tasks/panel
+
+    steps:
+      - name: Check out PR branch
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      - name: Set up Node
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: custom_components/tasks/panel/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type check
+        run: npx tsc --noEmit
+
+      - name: Build bundle
+        run: npm run build
+
+      - name: Commit rebuilt bundle
+        run: |
+          if git diff --quiet -- dist/; then
+            echo "Bundle unchanged; nothing to commit."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add dist/
+          git commit -m "chore: rebuild panel bundle for dependency bump"
+          git push
