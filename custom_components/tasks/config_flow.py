@@ -48,7 +48,7 @@ class TasksConfigFlow(ConfigFlow, domain=DOMAIN):
 
     @staticmethod
     @callback
-    def async_get_options_flow(config_entry: ConfigEntry) -> OptionsFlow:  # noqa: ARG004
+    def async_get_options_flow(config_entry: ConfigEntry) -> OptionsFlow:
         """Handle callback for options flow."""
         return TasksOptionsFlowHandler()
 

@@ -130,7 +130,7 @@ class TasksCalendar(CalendarEntity):
 
     async def async_get_events(
         self,
-        hass: HomeAssistant,  # noqa: ARG002
+        hass: HomeAssistant,
         start_date: datetime,
         end_date: datetime,
     ) -> list[CalendarEvent]:

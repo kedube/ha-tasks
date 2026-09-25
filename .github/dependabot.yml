@@ -1,11 +1,6 @@
 # https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
 version: 2
 updates:
-  - package-ecosystem: "devcontainers"
-    directory: "/"
-    schedule:
-      interval: "daily"
-
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
@@ -18,6 +13,13 @@ updates:
     ignore:
       # Dependabot should not update Home Assistant as that should match the homeassistant key in hacs.json
       - dependency-name: "homeassistant"
+      # These follow the Home Assistant version the tests run against:
+      # pytest-homeassistant-custom-component pins homeassistant and pytest-cov
+      # exactly, and home-assistant-frontend must match that release. Bump the
+      # three together, by hand, when raising the tested Home Assistant version.
+      - dependency-name: "pytest-homeassistant-custom-component"
+      - dependency-name: "pytest-cov"
+      - dependency-name: "home-assistant-frontend"
 
   - package-ecosystem: "npm"
     directory: "/custom_components/tasks/panel"

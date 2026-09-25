@@ -26,8 +26,8 @@ RELEASE_TAG_RE = re.compile(r"^v?(\d+(?:\.\d+){1,2})$")
 
 
 def _git(*args: str) -> str:
-    return subprocess.run(  # noqa: S603
-        ["git", *args],  # noqa: S607
+    return subprocess.run(
+        ["git", *args],
         check=True,
         capture_output=True,
         text=True,

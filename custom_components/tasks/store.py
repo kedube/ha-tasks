@@ -151,8 +151,8 @@ class _TaskStorage(storage.Store):
 
     async def _async_migrate_func(
         self,
-        old_major_version: int,  # noqa: ARG002
-        old_minor_version: int,  # noqa: ARG002
+        old_major_version: int,
+        old_minor_version: int,
         old_data: dict | list,
     ) -> dict | list:
         return old_data
@@ -238,7 +238,7 @@ class TaskStore:
                         month
                         for month in task.active_months
                         # bool is an int subclass; True must not become month 1.
-                        if type(month) is int and 1 <= month <= 12  # noqa: PLR2004
+                        if type(month) is int and 1 <= month <= 12
                     }
                 )
             else:
@@ -494,7 +494,7 @@ class TaskStore:
             if key not in ALLOWED_UPDATE_FIELDS:
                 continue
             if key in ("tag_id", "area_id"):
-                value = value or None  # noqa: PLW2901
+                value = value or None
             setattr(task, key, value)
 
         self._normalize_trigger_fields(task)

@@ -46,10 +46,10 @@ People *love* thorough bug reports. I'm not even kidding.
 
 ## Development environment
 
-The repo ships a devcontainer (Python 3.14, Node 20) that runs a standalone Home Assistant with the included [`configuration.yaml`](./config/configuration.yaml), which also loads the [example dashboard](docs/example-dashboard.md). Outside the container, use the helper scripts:
+You need Python 3.14.2 or newer (Home Assistant 2026.3 requires it) and, for the panel, Node 24. Then use the helper scripts:
 
 - `scripts/setup`: create a `.venv` and install the requirements.
-- `scripts/develop`: run a local Home Assistant with the integration symlinked in.
+- `scripts/develop`: run a local Home Assistant with the integration symlinked in, using the included [`configuration.yaml`](./config/configuration.yaml), which also loads the [example dashboard](docs/example-dashboard.md).
 - `scripts/lint`: run `ruff format` and `ruff check --fix`.
 - `scripts/e2e_smoke.py`: the browser smoke test (see [Tests](#tests)).
 
@@ -108,7 +108,7 @@ Every push and pull request runs the **CI** workflow:
 
 - HACS validation and hassfest
 - ruff
-- pytest on Python 3.13 and 3.14, with the 85% coverage gate
+- pytest on Python 3.14 against Home Assistant 2026.3.2, the minimum in `hacs.json`, with the 85% coverage gate
 - for the panel: a type-check, the vitest run, and a build that fails if the committed bundles drift from the sources or legacy Home Assistant components reappear
 - the browser smoke test, whose screenshot is uploaded as a run artifact
 
