@@ -142,7 +142,7 @@ jobs:
 
       - name: Create GitHub release
         if: steps.head_check.outputs.release_action != 'skip'
-        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2
+        uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
         with:
           tag_name: ${{ steps.bump.outputs.new_version || steps.current_version.outputs.new_version }}
           target_commitish: ${{ steps.commit_release.outputs.release_target || steps.head_check.outputs.release_target }}
