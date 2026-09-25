@@ -117,7 +117,7 @@ def _commit(cwd: Path, content: str, message: str) -> None:
 
 def _generate_notes(tmp_path, monkeypatch, capsys, version: str) -> str:
     monkeypatch.chdir(tmp_path)
-    monkeypatch.setenv("GITHUB_REPOSITORY", "kedube/ha-home_maintenance")
+    monkeypatch.setenv("GITHUB_REPOSITORY", "kedube/ha-tasks")
     monkeypatch.setattr(sys, "argv", ["generate_release_notes.py", version, "notes.md"])
     load_script("generate_release_notes").main()
     capsys.readouterr()
@@ -142,7 +142,7 @@ def test_generate_release_notes(tmp_path, monkeypatch, capsys) -> None:
     assert "- older entry" not in notes
     assert "fix: a real change" in notes
     assert "chore(release)" not in notes
-    assert "https://github.com/kedube/ha-home_maintenance/compare/1.6...1.7" in notes
+    assert "https://github.com/kedube/ha-tasks/compare/1.6...1.7" in notes
 
 
 def test_release_notes_compare_against_the_highest_older_release(

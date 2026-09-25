@@ -1,7 +1,7 @@
 # Tasks for Home Assistant
 
-[![CI](https://github.com/kedube/ha-home_maintenance/actions/workflows/ci.yml/badge.svg)](https://github.com/kedube/ha-home_maintenance/actions/workflows/ci.yml)
-[![Release](https://img.shields.io/github/v/release/kedube/ha-home_maintenance)](https://github.com/kedube/ha-home_maintenance/releases)
+[![CI](https://github.com/kedube/ha-tasks/actions/workflows/ci.yml/badge.svg)](https://github.com/kedube/ha-tasks/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/kedube/ha-tasks)](https://github.com/kedube/ha-tasks/releases)
 [![HACS Custom](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://hacs.xyz/)
 
 Track recurring tasks in Home Assistant, from changing the furnace filter to testing the smoke alarms or descaling the espresso machine. See what needs doing at a glance and check tasks off from anywhere.
@@ -49,7 +49,7 @@ Tasks needs Home Assistant **2026.3.2** or newer.
 
 1. In Home Assistant, open **HACS**.
 2. Open the menu in the top-right corner (**⋮**) and choose **Custom repositories**.
-3. Add `https://github.com/kedube/ha-home_maintenance` with the type **Integration**.
+3. Add `https://github.com/kedube/ha-tasks` with the type **Integration**.
 4. Search HACS for **Tasks**, open it, and click **Download**.
 5. Restart Home Assistant.
 6. Go to **Settings → Devices & services → Add integration** and choose **Tasks**, or use this button:
@@ -58,7 +58,7 @@ Tasks needs Home Assistant **2026.3.2** or newer.
 
 ### Manually
 
-1. Download `tasks.zip` from the [latest release](https://github.com/kedube/ha-home_maintenance/releases/latest).
+1. Download `tasks.zip` from the [latest release](https://github.com/kedube/ha-tasks/releases/latest).
 2. Extract it into `config/custom_components/tasks`.
 3. Restart Home Assistant and add the integration as in step 6 above.
 
@@ -433,7 +433,7 @@ automation:
 - Change the Add Task card to `custom:tasks-add-task-card`.
 - The *Home Maintenance Todo* card no longer exists. Use the [panel](#using-the-panel), or the built-in to-do list card on `todo.tasks`.
 
-**A field is missing or a button does nothing.** Try a private browser window first, to rule out old files in the browser's cache. If it still happens, [open an issue](https://github.com/kedube/ha-home_maintenance/issues) with your Home Assistant version and the browser console's output (press F12 to open it).
+**A field is missing or a button does nothing.** Try a private browser window first, to rule out old files in the browser's cache. If it still happens, [open an issue](https://github.com/kedube/ha-tasks/issues) with your Home Assistant version and the browser console's output (press F12 to open it).
 
 **Other users can't see the panel.** Turn off **Admin only** under [Configuration](#configuration). They'll be able to view tasks and check them off, but not change them.
 
@@ -441,7 +441,7 @@ automation:
 
 **Reporting a bug?** Attach the diagnostics file from **Settings → Devices & services → Tasks → ⋮ → Download diagnostics**. Descriptions, notes, links, and tag IDs are removed from it automatically.
 
-Found a bug or have an idea? [Open an issue](https://github.com/kedube/ha-home_maintenance/issues).
+Found a bug or have an idea? [Open an issue](https://github.com/kedube/ha-tasks/issues).
 
 ## Contributing
 
