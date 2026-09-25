@@ -136,7 +136,7 @@ The version lives in `const.py` (`VERSION`) and `manifest.json`, kept in lockste
 
 ## Tests
 
-`tests/` runs on `pytest-homeassistant-custom-component` (see `requirements_test.txt`) with an enforced coverage gate (see `pytest.ini`), on Python 3.13 and 3.14 in CI:
+`tests/` runs on `pytest-homeassistant-custom-component` (see `requirements_test.txt`) with an enforced coverage gate (see `pytest.ini`), on Python 3.14 in CI:
 
 - `test_triggers.py` — trigger semantics, including runtime external-reset handling
 - `test_store.py` — persistence round-trip, update whitelist, completion effects, delayed-save flush

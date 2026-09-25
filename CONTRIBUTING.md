@@ -108,7 +108,7 @@ Every push and pull request runs the **CI** workflow:
 
 - HACS validation and hassfest
 - ruff
-- pytest on Python 3.13 and 3.14, with the 85% coverage gate
+- pytest on Python 3.14 against Home Assistant 2026.3.2, the minimum in `hacs.json`, with the 85% coverage gate
 - for the panel: a type-check, the vitest run, and a build that fails if the committed bundles drift from the sources or legacy Home Assistant components reappear
 - the browser smoke test, whose screenshot is uploaded as a run artifact
 
