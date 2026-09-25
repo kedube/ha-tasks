@@ -4,7 +4,7 @@ Notable changes to Tasks (formerly Home Maintenance). The Unreleased section
 is rotated into a versioned section by the release workflow and becomes the
 Highlights block of the GitHub release notes.
 
-## Unreleased
+## 1.8 — 2026-09-25
 
 - Fixed: links still pointed at the old `kedube/ha-home_maintenance`
   repository, which no longer exists. The README's HACS install URL,
