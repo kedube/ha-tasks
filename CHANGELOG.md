@@ -4,7 +4,7 @@ Notable changes to Tasks (formerly Home Maintenance). The Unreleased section
 is rotated into a versioned section by the release workflow and becomes the
 Highlights block of the GitHub release notes.
 
-## Unreleased
+## 1.6 — 2026-09-25
 
 - Changed: releases are numbered `X.Y` and step by 0.1, rolling over to the
   next whole number after .9 (0.9 → 1.0). The next release after 1.5.27 is
