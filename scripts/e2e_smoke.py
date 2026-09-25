@@ -332,10 +332,16 @@ def main() -> int:
     errors: list[str] = []
     warnings: list[str] = []
     with log_path.open("wb") as log_file:
+        # HA 2026.9+ migrates http: YAML into storage and stages anything that
+        # differs from the default as a pending trial, which pops a modal
+        # confirm/revert dialog over the panel. SETUP_PORT makes the default
+        # port match the YAML, so nothing is staged; older releases ignore it
+        # and read the YAML.
         proc = subprocess.Popen(
             [hass_python, "-m", "homeassistant", "--config", str(config_dir)],
             stdout=log_file,
             stderr=subprocess.STDOUT,
+            env={**os.environ, "SETUP_PORT": str(args.port)},
         )
         try:
             print("waiting for Home Assistant to boot...")
