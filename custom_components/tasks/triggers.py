@@ -54,7 +54,7 @@ def _advance_to_active_month(day: date, active_months: list[int]) -> date:
     year, month = day.year, day.month
     for _ in range(12):
         month += 1
-        if month > 12:  # noqa: PLR2004
+        if month > 12:
             month = 1
             year += 1
         if month in active_months:
@@ -77,7 +77,7 @@ def _next_season_boundary(today: date, active_months: list[int]) -> date | None:
     year, month = today.year, today.month
     for _ in range(12):
         month += 1
-        if month > 12:  # noqa: PLR2004
+        if month > 12:
             month = 1
             year += 1
         if (month in active_months) != currently_active:

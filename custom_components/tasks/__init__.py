@@ -92,7 +92,7 @@ class TasksData:
 type TasksConfigEntry = ConfigEntry[TasksData]
 
 
-async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:  # noqa: ARG001
+async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     """Track states and offer events for sensors."""
     return True
 
