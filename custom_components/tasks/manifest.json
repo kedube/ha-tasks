@@ -14,9 +14,9 @@
     "panel_custom",
     "tag"
   ],
-  "documentation": "https://github.com/kedube/ha-home_maintenance",
+  "documentation": "https://github.com/kedube/ha-tasks",
   "iot_class": "local_polling",
-  "issue_tracker": "https://github.com/kedube/ha-home_maintenance/issues",
+  "issue_tracker": "https://github.com/kedube/ha-tasks/issues",
   "requirements": [],
   "single_config_entry": true,
   "version": "1.7"
