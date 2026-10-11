@@ -1,8 +1,9 @@
 # Tasks for Home Assistant
 
+[![HACS Custom](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://hacs.xyz/docs/faq/custom_repositories/)
+[![GitHub Release](https://img.shields.io/github/v/release/kedube/ha-tasks?sort=semver)](https://github.com/kedube/ha-tasks/releases)
 [![CI](https://github.com/kedube/ha-tasks/actions/workflows/ci.yml/badge.svg)](https://github.com/kedube/ha-tasks/actions/workflows/ci.yml)
-[![Release](https://img.shields.io/github/v/release/kedube/ha-tasks)](https://github.com/kedube/ha-tasks/releases)
-[![HACS Custom](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://hacs.xyz/)
+[![License](https://img.shields.io/github/license/kedube/ha-tasks)](LICENSE)
 
 Track recurring tasks in Home Assistant, from changing the furnace filter to testing the smoke alarms or descaling the espresso machine. See what needs doing at a glance and check tasks off from anywhere.
 
