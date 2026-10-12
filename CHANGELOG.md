@@ -4,7 +4,7 @@ Notable changes to Tasks (formerly Home Maintenance). The Unreleased section
 is rotated into a versioned section by the release workflow and becomes the
 Highlights block of the GitHub release notes.
 
-## Unreleased
+## 2.2 — 2026-10-12
 
 - Added: Simplified Chinese (简体中文) translations for the panel, the Add
   Task card, and the integration's setup, options, and repair messages.
