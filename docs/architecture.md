@@ -122,7 +122,7 @@ Pure, DOM-free logic lives in dedicated modules so vitest exercises it in plain 
 - `src/styles.ts` — `commonStyle` (panel chrome and dialogs) and `baseStyles`: the status palette (`--todo-*`, from the theme's error / warning / primary / success colors), native-button reset, icon buttons, and badges shared by the task list, group sidebar, and panel.
 - `src/add-task-card.ts` / `src/add-task-card-element.ts` — the Add Task Lovelace card. The entry file only waits for HA's frontend to define `<home-assistant>` before loading the card: extra modules can run (from the browser cache) before the frontend swaps in its scoped custom-element registry, and anything defined earlier is lost. The card reuses `hm-task-form` with its button in the card footer, shows non-admin users a note instead, and its config editor is a schema-driven `ha-form`.
 - `src/data/websockets.ts` — typed websocket calls.
-- `localize/` — translations (eight languages; `tests/localize.test.ts` checks every file has exactly the English keys), bundled at build time.
+- `localize/` — translations (nine languages; `tests/localize.test.ts` checks every file has exactly the English keys), bundled at build time.
 
 Dependencies are exact-pinned with a committed `package-lock.json`; CI builds with `npm ci` and fails if the committed bundles drift from the sources.
 

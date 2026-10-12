@@ -6,6 +6,7 @@ import * as it from './languages/it.json';
 import * as nl from './languages/nl.json';
 import * as pl from './languages/pl.json';
 import * as ptBR from './languages/pt-BR.json';
+import * as zhHans from './languages/zh-Hans.json';
 
 import IntlMessageFormat from 'intl-messageformat';
 
@@ -18,6 +19,7 @@ var languages: any = {
     nl: nl,
     pl: pl,
     'pt-BR': ptBR,
+    'zh-Hans': zhHans,
 };
 
 /**

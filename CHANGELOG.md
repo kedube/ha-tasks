@@ -4,6 +4,14 @@ Notable changes to Tasks (formerly Home Maintenance). The Unreleased section
 is rotated into a versioned section by the release workflow and becomes the
 Highlights block of the GitHub release notes.
 
+## Unreleased
+
+- Added: Simplified Chinese (简体中文) translations for the panel, the Add
+  Task card, and the integration's setup, options, and repair messages.
+  Tasks now covers the eight most-used languages among Home Assistant
+  installs: English, German, French, Dutch, Spanish, Simplified Chinese,
+  Italian, and Polish, plus Brazilian Portuguese.
+
 ## 1.8 — 2026-09-25
 
 - Fixed: links still pointed at the old `kedube/ha-home_maintenance`

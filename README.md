@@ -24,7 +24,7 @@ Track recurring tasks in Home Assistant, from changing the furnace filter to tes
 - **Reminders for each task,** with an early warning, snooze, and a link to open (a manual, for example).
 - **A quick start:** 90+ ready-made templates, plus import and export by spreadsheet (CSV).
 - **Room for the whole household:** other users can view tasks and check them off, while only admins can change them.
-- **Available in 8 languages.**
+- **Available in 9 languages,** covering the eight most-used languages among Home Assistant installs.
 
 ## Contents
 

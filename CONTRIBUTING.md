@@ -93,7 +93,7 @@ npm test        # vitest: date math, bucketing, form validation, translations
 
 ### Translations
 
-The panel and the Add Task card are translated in `panel/localize/languages/*.json`, and the config flow in `custom_components/tasks/translations/*.json`. The current languages are English, German, French, Spanish, Italian, Dutch, Polish, and Brazilian Portuguese.
+The panel and the Add Task card are translated in `panel/localize/languages/*.json`, and the config flow in `custom_components/tasks/translations/*.json`. The current languages are English, German, French, Dutch, Spanish, Simplified Chinese, Italian, Polish, and Brazilian Portuguese.
 
 - New user-facing strings go into every panel language file. The vitest suite fails if any language's keys drift from English.
 - To add a language, copy both `en.json` files and translate every key. Then register the panel file in `panel/localize/localize.ts`.

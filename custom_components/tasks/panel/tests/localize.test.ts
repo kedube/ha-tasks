@@ -60,6 +60,10 @@ describe('localize', () => {
         expect(localize('common.cancel', 'pt')).toBe(localize('common.cancel', 'pt-BR'));
     });
 
+    it('resolves script-tagged languages', () => {
+        expect(localize('common.cancel', 'zh-Hans')).toBe('取消');
+    });
+
     it('substitutes placeholders', () => {
         expect(localize('card.add_task.added', 'en', '{title}', 'Gutters')).toBe('"Gutters" added.');
     });
@@ -69,5 +73,10 @@ describe('localize', () => {
         expect(localize('panel.list.days_overdue', 'en', '{count}', 3)).toBe('3 days overdue');
         expect(localize('panel.list.days_left', 'en', '{count}', 1)).toBe('Due in 1 day');
         expect(localize('panel.list.days_left', 'en', '{count}', 5)).toBe('5 days left');
+    });
+
+    it('formats plural messages in languages without a singular form', () => {
+        expect(localize('panel.list.days_overdue', 'zh-Hans', '{count}', 1)).toBe('已逾期 1 天');
+        expect(localize('panel.list.days_overdue', 'zh-Hans', '{count}', 3)).toBe('已逾期 3 天');
     });
 });

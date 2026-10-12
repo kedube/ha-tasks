@@ -1,0 +1,46 @@
+{
+  "config": {
+    "flow_title": "Tasks",
+    "step": {
+      "user": {
+        "title": "配置 Tasks",
+        "description": "设置 Tasks 集成。",
+        "data": {
+          "admin_only": "仅限管理员访问面板",
+          "sidebar_title": "此集成在侧边栏中显示的名称。"
+        },
+        "data_description": {
+          "admin_only": "关闭后，其他用户也可以打开面板查看任务并将其标记为完成；添加、编辑和移除任务仍仅限管理员。"
+        }
+      }
+    },
+    "abort": {
+      "single_instance_allowed": "Tasks 只允许配置一个实例。"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "admin_only": "仅限管理员访问面板",
+          "sidebar_title": "此集成在侧边栏中显示的名称。",
+          "due_soon_days": "面板中“即将到期”的时间范围（天）",
+          "max_history_entries": "每个任务保留的完成记录条数（0 = 不限）"
+        },
+        "data_description": {
+          "admin_only": "关闭后，其他用户也可以打开面板查看任务并将其标记为完成；添加、编辑和移除任务仍仅限管理员。"
+        }
+      }
+    }
+  },
+  "issues": {
+    "missing_watched_entity": {
+      "title": "“{title}”监视的实体不存在",
+      "description": "任务“{title}”监视 `{entity_id}`，但该实体已不存在。在该实体恢复或任务改为监视其他实体之前，此任务的计数或运行时长进度不会增加。"
+    },
+    "missing_notify_service": {
+      "title": "“{title}”的通知服务不存在",
+      "description": "任务“{title}”通过 `{service}` 发送通知，但该服务不可用。在该服务恢复或任务改为使用其他通知服务之前，此任务的通知将会发送失败。"
+    }
+  }
+}
