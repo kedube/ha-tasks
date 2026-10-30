@@ -5,7 +5,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.device_registry import DeviceInfo
 
-VERSION = "2.5"
+VERSION = "2.6"
 NAME = "Tasks"
 MANUFACTURER = "@TJPoorman"
 

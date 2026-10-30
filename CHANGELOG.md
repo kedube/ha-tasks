@@ -4,7 +4,7 @@ Notable changes to Tasks (formerly Home Maintenance). The Unreleased section
 is rotated into a versioned section by the release workflow and becomes the
 Highlights block of the GitHub release notes.
 
-## Unreleased
+## 2.6 — 2026-10-30
 
 - Fixed: on Home Assistant 2026.11, Tasks failed to load ("Error migrating
   entry") if it was first set up with an early release, whose setup entry
