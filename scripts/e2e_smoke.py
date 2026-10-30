@@ -36,7 +36,7 @@ from typing import TYPE_CHECKING
 from playwright.sync_api import sync_playwright
 
 if TYPE_CHECKING:
-    from playwright.sync_api import Browser, Playwright
+    from playwright.sync_api import Browser, ConsoleMessage, Page, Playwright
 
 REPO = Path(__file__).resolve().parent.parent
 USERNAME = "smoke"
@@ -209,10 +209,12 @@ FATAL_JS_ERROR = re.compile(
 )
 
 
-def drive_panel(base: str) -> tuple[list[str], list[str]]:
-    """Exercise the panel in a real browser. Returns (errors, warnings)."""
-    errors: list[str] = []
-    warnings: list[str] = []
+def drive_panel(base: str, errors: list[str], warnings: list[str]) -> None:
+    """Exercise the panel in a real browser, appending to errors/warnings.
+
+    The lists are the caller's so that soft failures recorded before an
+    exception (e.g. the edit dialog never opening) survive it.
+    """
 
     def on_pageerror(err: object) -> None:
         text = f"pageerror: {err}"
@@ -220,84 +222,95 @@ def drive_panel(base: str) -> tuple[list[str], list[str]]:
             return
         (errors if FATAL_JS_ERROR.search(text) else warnings).append(text)
 
+    # The panel swallows websocket failures into console.error (e.g. the
+    # edit dialog failing to load its task), so surface them.
+    def on_console(msg: ConsoleMessage) -> None:
+        if msg.type == "error":
+            warnings.append(f"console.error: {msg.text}")
+
     with sync_playwright() as p:
         browser = launch_browser(p)
         page = browser.new_page(viewport={"width": 1400, "height": 950})
         page.on("pageerror", on_pageerror)
-
-        page.goto(base, wait_until="networkidle")
-        page.fill('input[name="username"]', USERNAME, timeout=30000)
-        page.fill('input[name="password"]', PASSWORD)
-        page.keyboard.press("Enter")
-        page.wait_for_url("**/home/**", timeout=60000)
-
-        page.goto(f"{base}/tasks", wait_until="networkidle")
-        # A fresh install has no tasks, so the panel shows its first-run
-        # state; the group sidebar renders at this (wide) viewport.
-        page.wait_for_selector("tasks-panel .onboarding", timeout=30000)
-        page.wait_for_selector("hm-group-nav", state="attached", timeout=30000)
-
-        # Every input the panel depends on must actually render. Wait for
-        # each selector rather than sleeping a fixed interval and counting:
-        # slow CI runners can take several seconds after the panel attaches
-        # to load the HA component chunks that render the fields, and a
-        # too-early census reports 0 for a panel that works fine.
-        def expect_rendered(checks: list[tuple[str, str, int]]) -> None:
-            for name, selector, minimum in checks:
-                with contextlib.suppress(Exception):
-                    page.wait_for_selector(selector, state="attached", timeout=30000)
-                count = page.locator(selector).count()
-                if count < minimum:
-                    errors.append(
-                        f"{name}: expected >= {minimum} of {selector}, found {count}"
-                    )
-
-        # Add a task through the add-task dialog (opened by the FAB).
-        page.locator("tasks-panel .fab").click()
-        expect_rendered(
-            [
-                ("task form fields", "hm-add-task-dialog hm-task-form ha-selector", 5),
-                ("task title input", "hm-add-task-dialog .field.title input", 1),
-                ("dialog add button", "hm-add-task-dialog .submit-button", 1),
-            ]
-        )
-        dialog = page.locator("hm-add-task-dialog")
-        dialog.locator(".field.title input").first.fill("Smoke Test Task")
-        dialog.locator(".field.interval_value input").first.fill("30")
-        dialog.locator(".submit-button").first.click()
+        page.on("console", on_console)
         try:
-            page.wait_for_selector(
-                "hm-task-list .row-title >> text=Smoke Test Task", timeout=15000
-            )
-        except Exception:  # noqa: BLE001 - absence is the failure being recorded
-            errors.append("added task did not appear in the task list")
+            _exercise_panel(page, base, errors)
+        finally:
+            # Screenshot failures too: that is when it's needed.
+            with contextlib.suppress(Exception):
+                page.screenshot(path=SCREENSHOT, full_page=True)
+            browser.close()
 
-        # The task's details open the edit dialog, whose fields must render.
-        with contextlib.suppress(Exception):
-            page.locator("hm-task-list .row-main").first.click()
-            page.locator("hm-task-list .details .action-button").first.click()
-        expect_rendered(
-            [("edit dialog fields", "hm-edit-dialog ha-dialog ha-selector", 5)]
+
+def _exercise_panel(page: Page, base: str, errors: list[str]) -> None:
+    """Log in, add a task, open its edit dialog, and create a group."""
+    page.goto(base, wait_until="networkidle")
+    page.fill('input[name="username"]', USERNAME, timeout=30000)
+    page.fill('input[name="password"]', PASSWORD)
+    page.keyboard.press("Enter")
+    page.wait_for_url("**/home/**", timeout=60000)
+
+    page.goto(f"{base}/tasks", wait_until="networkidle")
+    # A fresh install has no tasks, so the panel shows its first-run
+    # state; the group sidebar renders at this (wide) viewport.
+    page.wait_for_selector("tasks-panel .onboarding", timeout=30000)
+    page.wait_for_selector("hm-group-nav", state="attached", timeout=30000)
+
+    # Every input the panel depends on must actually render. Wait for
+    # each selector rather than sleeping a fixed interval and counting:
+    # slow CI runners can take several seconds after the panel attaches
+    # to load the HA component chunks that render the fields, and a
+    # too-early census reports 0 for a panel that works fine.
+    def expect_rendered(checks: list[tuple[str, str, int]]) -> None:
+        for name, selector, minimum in checks:
+            with contextlib.suppress(Exception):
+                page.wait_for_selector(selector, state="attached", timeout=30000)
+            count = page.locator(selector).count()
+            if count < minimum:
+                errors.append(
+                    f"{name}: expected >= {minimum} of {selector}, found {count}"
+                )
+
+    # Add a task through the add-task dialog (opened by the FAB).
+    page.locator("tasks-panel .fab").click()
+    expect_rendered(
+        [
+            ("task form fields", "hm-add-task-dialog hm-task-form ha-selector", 5),
+            ("task title input", "hm-add-task-dialog .field.title input", 1),
+            ("dialog add button", "hm-add-task-dialog .submit-button", 1),
+        ]
+    )
+    dialog = page.locator("hm-add-task-dialog")
+    dialog.locator(".field.title input").first.fill("Smoke Test Task")
+    dialog.locator(".field.interval_value input").first.fill("30")
+    dialog.locator(".submit-button").first.click()
+    try:
+        page.wait_for_selector(
+            "hm-task-list .row-title >> text=Smoke Test Task", timeout=15000
         )
-        # Cancel, not Escape: HA 2026.3+ ignores Escape on dialogs that set
-        # prevent-scrim-close (so a half-filled form isn't lost).
-        page.locator("hm-edit-dialog ha-button[data-dialog='close']").first.click()
+    except Exception:  # noqa: BLE001 - absence is the failure being recorded
+        errors.append("added task did not appear in the task list")
 
-        # Create a group from the sidebar.
-        page.locator("hm-group-nav .nav-heading .icon-button").first.click()
-        group_input = page.locator("hm-group-nav .nav-input").first
-        group_input.fill("Smoke Group")
-        group_input.press("Enter")
-        try:
-            page.wait_for_selector(
-                "hm-group-nav .nav-label >> text=Smoke Group", timeout=15000
-            )
-        except Exception:  # noqa: BLE001 - absence is the failure being recorded
-            errors.append("created group did not appear in the group sidebar")
+    # The task's details open the edit dialog, whose fields must render.
+    with contextlib.suppress(Exception):
+        page.locator("hm-task-list .row-main").first.click()
+        page.locator("hm-task-list .details .action-button").first.click()
+    expect_rendered([("edit dialog fields", "hm-edit-dialog ha-dialog ha-selector", 5)])
+    # Cancel, not Escape: HA 2026.3+ ignores Escape on dialogs that set
+    # prevent-scrim-close (so a half-filled form isn't lost).
+    page.locator("hm-edit-dialog ha-button[data-dialog='close']").first.click()
 
-        page.screenshot(path=SCREENSHOT, full_page=True)
-        browser.close()
-    return errors, warnings
+    # Create a group from the sidebar.
+    page.locator("hm-group-nav .nav-heading .icon-button").first.click()
+    group_input = page.locator("hm-group-nav .nav-input").first
+    group_input.fill("Smoke Group")
+    group_input.press("Enter")
+    try:
+        page.wait_for_selector(
+            "hm-group-nav .nav-label >> text=Smoke Group", timeout=15000
+        )
+    except Exception:  # noqa: BLE001 - absence is the failure being recorded
+        errors.append("created group did not appear in the group sidebar")
 
 
 def main() -> int:
@@ -313,6 +326,9 @@ def main() -> int:
     )
     args = parser.parse_args()
     base = f"http://localhost:{args.port}"
+    # CI captures stdout through a pipe; line-buffer it so the log
+    # timestamps show which stage stalled instead of all landing at exit.
+    sys.stdout.reconfigure(line_buffering=True)
 
     config_dir = Path(tempfile.mkdtemp(prefix="hm-smoke-"))
     # Deliberately minimal: default_config would pip-install requirements
@@ -352,7 +368,7 @@ def main() -> int:
             add_integration(base, token)
             time.sleep(3)
             print("driving the panel...")
-            errors, warnings = drive_panel(base)
+            drive_panel(base, errors, warnings)
         except Exception as err:  # noqa: BLE001 - report, dump logs, fail the run
             errors.append(f"{type(err).__name__}: {err}")
         finally:
