@@ -8,7 +8,9 @@ from custom_components.tasks import TasksData
 from custom_components.tasks.const import DOMAIN
 from custom_components.tasks.store import Task
 
-ENTITY_ID = "binary_sensor.any_task_due"
+from . import entity_id_for
+
+UNIQUE_ID = f"{DOMAIN}_any_task_due"
 
 
 def make_task(task_id: str, *, overdue: bool) -> Task:
@@ -23,7 +25,7 @@ def make_task(task_id: str, *, overdue: bool) -> Task:
 
 
 async def test_off_with_no_tasks(hass, setup_entry) -> None:
-    state = hass.states.get(ENTITY_ID)
+    state = hass.states.get(entity_id_for(hass, UNIQUE_ID))
     assert state is not None
     assert state.state == "off"
     assert state.attributes["due_count"] == 0
@@ -31,16 +33,17 @@ async def test_off_with_no_tasks(hass, setup_entry) -> None:
 
 
 async def test_reflects_due_tasks_and_completion(hass, setup_entry) -> None:
+    entity_id = entity_id_for(hass, UNIQUE_ID)
     data: TasksData = hass.data[DOMAIN]
     data.store.add(make_task("tasks_fresh_one", overdue=False))
     await hass.async_block_till_done()
-    assert hass.states.get(ENTITY_ID).state == "off"
+    assert hass.states.get(entity_id).state == "off"
 
     data.store.add(make_task("tasks_late_one", overdue=True))
     data.store.add(make_task("tasks_late_two", overdue=True))
     await hass.async_block_till_done()
 
-    state = hass.states.get(ENTITY_ID)
+    state = hass.states.get(entity_id)
     assert state.state == "on"
     assert state.attributes["due_count"] == 2
     assert state.attributes["due_tasks"] == ["Late One", "Late Two"]
@@ -50,7 +53,7 @@ async def test_reflects_due_tasks_and_completion(hass, setup_entry) -> None:
     data.store.update_last_performed("tasks_late_two")
     await hass.async_block_till_done()
 
-    state = hass.states.get(ENTITY_ID)
+    state = hass.states.get(entity_id)
     assert state.state == "off"
     assert state.attributes["due_count"] == 0
 
@@ -58,6 +61,7 @@ async def test_reflects_due_tasks_and_completion(hass, setup_entry) -> None:
 async def test_turns_on_when_a_task_comes_due_by_time(
     hass, setup_entry, freezer
 ) -> None:
+    entity_id = entity_id_for(hass, UNIQUE_ID)
     data: TasksData = hass.data[DOMAIN]
     data.store.add(
         Task(
@@ -69,7 +73,7 @@ async def test_turns_on_when_a_task_comes_due_by_time(
         )
     )
     await hass.async_block_till_done()
-    assert hass.states.get(ENTITY_ID).state == "off"
+    assert hass.states.get(entity_id).state == "off"
 
     # Jump past the due moment and fire the scheduled wall-clock refresh.
     freezer.tick(timedelta(days=2, minutes=1))
@@ -80,4 +84,4 @@ async def test_turns_on_when_a_task_comes_due_by_time(
     async_fire_time_changed(hass)
     await hass.async_block_till_done()
 
-    assert hass.states.get(ENTITY_ID).state == "on"
+    assert hass.states.get(entity_id).state == "on"

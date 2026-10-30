@@ -14,6 +14,8 @@ from custom_components.tasks.const import (
 )
 from custom_components.tasks.store import Task
 
+from . import entity_id_for
+
 
 def local(year: int, month: int, day: int) -> datetime:
     return dt_util.start_of_local_day(date(year, month, day))
@@ -44,7 +46,7 @@ async def test_create_task_service_creates_entity(hass, setup_entry) -> None:
     assert task.description == "MERV 13"
     assert "HVAC" in data.store.get_groups()
 
-    state = hass.states.get("binary_sensor.replace_hvac_filter")
+    state = hass.states.get(entity_id_for(hass, task_id))
     assert state is not None
     assert state.state == "off"  # last_performed defaulted to today
     assert state.attributes["days_until_due"] == 90
@@ -54,7 +56,7 @@ async def test_create_task_service_date_trigger_past_anchor_is_due(
     hass, setup_entry
 ) -> None:
     anchor = (dt_util.now().date() - timedelta(days=10)).isoformat()
-    await hass.services.async_call(
+    response = await hass.services.async_call(
         DOMAIN,
         SERVICE_CREATE_TASK,
         {
@@ -65,10 +67,11 @@ async def test_create_task_service_date_trigger_past_anchor_is_due(
             "anchor_date": anchor,
         },
         blocking=True,
+        return_response=True,
     )
     await hass.async_block_till_done()
 
-    state = hass.states.get("binary_sensor.fixed_date_task")
+    state = hass.states.get(entity_id_for(hass, response["task_id"]))
     assert state is not None
     assert state.state == "on"  # the anchor already passed uncompleted
 
@@ -105,12 +108,6 @@ async def test_create_task_service_rejects_unparseable_last_performed(
         )
 
 
-async def _entity_id_for(hass, task_id: str) -> str:
-    from homeassistant.helpers import entity_registry as er
-
-    return er.async_get(hass).async_get_entity_id("binary_sensor", DOMAIN, task_id)
-
-
 async def test_mark_overdue_time_task(hass, setup_entry) -> None:
     data: TasksData = hass.data[DOMAIN]
     data.store.add(
@@ -123,7 +120,7 @@ async def test_mark_overdue_time_task(hass, setup_entry) -> None:
         )
     )
     await hass.async_block_till_done()
-    entity_id = await _entity_id_for(hass, "tasks_fresh")
+    entity_id = entity_id_for(hass, "tasks_fresh")
     assert hass.states.get(entity_id).state == "off"
 
     await hass.services.async_call(
@@ -151,7 +148,7 @@ async def test_mark_overdue_date_task(hass, setup_entry, freezer) -> None:
         )
     )
     await hass.async_block_till_done()
-    entity_id = await _entity_id_for(hass, "tasks_dated")
+    entity_id = entity_id_for(hass, "tasks_dated")
     assert hass.states.get(entity_id).state == "off"
 
     await hass.services.async_call(
@@ -182,7 +179,7 @@ async def test_mark_overdue_date_task_with_future_anchor_errors(
         )
     )
     await hass.async_block_till_done()
-    entity_id = await _entity_id_for(hass, "tasks_future")
+    entity_id = entity_id_for(hass, "tasks_future")
 
     with pytest.raises(ServiceValidationError):
         await hass.services.async_call(
@@ -205,7 +202,7 @@ async def test_mark_overdue_count_task(hass, setup_entry) -> None:
         )
     )
     await hass.async_block_till_done()
-    entity_id = await _entity_id_for(hass, "tasks_count")
+    entity_id = entity_id_for(hass, "tasks_count")
     assert hass.states.get(entity_id).state == "off"
 
     await hass.services.async_call(
@@ -231,7 +228,7 @@ async def test_mark_overdue_runtime_task(hass, setup_entry) -> None:
         )
     )
     await hass.async_block_till_done()
-    entity_id = await _entity_id_for(hass, "tasks_runtime")
+    entity_id = entity_id_for(hass, "tasks_runtime")
     assert hass.states.get(entity_id).state == "off"
 
     await hass.services.async_call(
@@ -258,7 +255,7 @@ async def test_mark_overdue_runtime_task_unavailable_sensor_errors(
         )
     )
     await hass.async_block_till_done()
-    entity_id = await _entity_id_for(hass, "tasks_runtime_gone")
+    entity_id = entity_id_for(hass, "tasks_runtime_gone")
 
     with pytest.raises(ServiceValidationError):
         await hass.services.async_call(
@@ -294,7 +291,7 @@ async def test_mark_overdue_seasonal_task_out_of_season_errors(
         )
     )
     await hass.async_block_till_done()
-    entity_id = await _entity_id_for(hass, "tasks_seasonal")
+    entity_id = entity_id_for(hass, "tasks_seasonal")
 
     with pytest.raises(ServiceValidationError):
         await hass.services.async_call(

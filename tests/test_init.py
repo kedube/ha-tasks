@@ -11,6 +11,8 @@ from custom_components.tasks.const import (
 )
 from custom_components.tasks.store import STORAGE_KEY
 
+from . import entity_id_for
+
 
 def seed_storage(hass_storage, tasks: list[dict]) -> None:
     """Seed the store's persisted data before setup."""
@@ -41,7 +43,7 @@ async def test_setup_creates_entities_for_stored_tasks(
     )
     await hass.async_block_till_done()
 
-    state = hass.states.get("binary_sensor.change_filter")
+    state = hass.states.get(entity_id_for(hass, "tasks_abc"))
     assert state is not None
     assert state.state == "on"  # long overdue
     assert state.attributes["trigger_type"] == "time"
@@ -78,7 +80,7 @@ async def test_stored_tasks_create_entities_on_startup(hass, hass_storage) -> No
         assert await hass.config_entries.async_setup(entry.entry_id)
         await hass.async_block_till_done()
 
-    state = hass.states.get("binary_sensor.clean_gutters")
+    state = hass.states.get(entity_id_for(hass, "tasks_seed"))
     assert state is not None
     assert state.state == "on"
 
@@ -215,7 +217,7 @@ async def test_services(hass, setup_entry) -> None:
     data.store.add(task)
     await hass.async_block_till_done()
 
-    entity_id = "binary_sensor.descale_machine"
+    entity_id = entity_id_for(hass, task.id)
     assert hass.states.get(entity_id) is not None
 
     await hass.services.async_call(
@@ -250,11 +252,12 @@ async def test_entity_removed_with_task(hass, setup_entry) -> None:
     )
     data.store.add(task)
     await hass.async_block_till_done()
-    assert hass.states.get("binary_sensor.doomed_task") is not None
+    entity_id = entity_id_for(hass, task.id)
+    assert hass.states.get(entity_id) is not None
 
     data.store.delete(task.id)
     await hass.async_block_till_done()
-    assert hass.states.get("binary_sensor.doomed_task") is None
+    assert hass.states.get(entity_id) is None
 
 
 async def test_service_reset_uses_local_calendar_date(hass, setup_entry) -> None:
@@ -277,7 +280,7 @@ async def test_service_reset_uses_local_calendar_date(hass, setup_entry) -> None
     await hass.services.async_call(
         DOMAIN,
         SERVICE_RESET,
-        {"entity_id": "binary_sensor.timezone_task", "performed_date": "2026-07-01"},
+        {"entity_id": entity_id_for(hass, task.id), "performed_date": "2026-07-01"},
         blocking=True,
     )
     # A naive-UTC interpretation would have stored 2026-06-30 here.
@@ -303,7 +306,7 @@ async def test_runtime_watcher_gates_insignificant_ticks(hass, setup_entry) -> N
     data.store.add(task)
     await hass.async_block_till_done()
 
-    entity_id = "binary_sensor.clean_fan"
+    entity_id = entity_id_for(hass, task.id)
     assert hass.states.get(entity_id).attributes["runtime_delta"] == 0
 
     # Sub-unit tick: no push, entity attributes stay put

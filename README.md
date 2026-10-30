@@ -216,7 +216,7 @@ Setup asks for the first two. To change any option later, go to **Settings → D
 The panel is where tasks are managed. To see them on a dashboard, use Home Assistant's own cards with the Tasks entities:
 
 - **[To-do list card](https://www.home-assistant.io/dashboards/todo-list/)** on `todo.tasks`: lists what's due, and checking an item off completes the task. Add `hide_completed: true` to show only due tasks.
-- **Tile** or **entities** card on a task's `binary_sensor`, or on [`binary_sensor.any_task_due`](#any-task-due) for a single "does anything need doing?" light.
+- **Tile** or **entities** card on a task's `binary_sensor`, or on [`binary_sensor.tasks_any_task_due`](#any-task-due) for a single "does anything need doing?" light.
 - **Calendar card** on [`calendar.tasks`](#calendar) for upcoming due dates.
 
 Tasks also includes an **Add Task** card: the panel's full add-task form on any dashboard. Only admins can add tasks, so other users see a short note instead. The card is set up automatically and appears in the card picker, or you can add it in YAML:
@@ -232,6 +232,8 @@ For a complete view that combines these cards, see the [example dashboard](docs/
 
 Every task is a `binary_sensor` that turns **on** while the task is due. All of them are grouped under one *Tasks* device.
 
+Entity IDs are named after the device and the task title, for example `binary_sensor.tasks_clean_gutters`. That's Home Assistant's naming since 2026.11. Entities created on an earlier version keep their IDs without the `tasks_` prefix (`binary_sensor.clean_gutters`, `binary_sensor.any_task_due`), so an upgraded install can have both styles. To find a task's entity ID, open the task's entity under **Settings → Devices & services → Entities**.
+
 ![The Tasks device's Sensors card listing Any task due and each task with its on/off state, beside the Details view of the Clean dryer vent task showing its trigger type, dates, description, interval, and days until due](screenshots/entities.png)
 
 A task's attributes depend on its trigger type:
@@ -246,11 +248,11 @@ A task's attributes depend on its trigger type:
 | `current_count`, `count_threshold`, `count_entity_id` | | | ✓ | |
 | `runtime_entity_id`, `runtime_threshold`, `runtime_baseline`, `runtime_current`, `runtime_delta` | | | | ✓ |
 
-`days_until_due` counts calendar days until the task is due: `0` means today and negative numbers mean overdue. That keeps automation conditions simple, for example `{{ state_attr('binary_sensor.clean_gutters', 'days_until_due') <= 3 }}`.
+`days_until_due` counts calendar days until the task is due: `0` means today and negative numbers mean overdue. That keeps automation conditions simple, for example `{{ state_attr('binary_sensor.tasks_clean_gutters', 'days_until_due') <= 3 }}`.
 
 ### Any task due
 
-`binary_sensor.any_task_due` is **on** while *any* task is due. Its attributes are `due_count`, `due_tasks` (the due tasks' titles), and `task_count`.
+`binary_sensor.tasks_any_task_due` (`binary_sensor.any_task_due` if Tasks was set up before Home Assistant 2026.11) is **on** while *any* task is due. Its attributes are `due_count`, `due_tasks` (the due tasks' titles), and `task_count`.
 
 ### To-do list
 
@@ -286,7 +288,7 @@ Marks a task done. You can backdate it with `performed_date` and add a `note` to
 ```yaml
 action: tasks.reset_last_performed
 data:
-  entity_id: binary_sensor.clean_gutters
+  entity_id: binary_sensor.tasks_clean_gutters
   performed_date: "2026-06-19"  # optional; defaults to today
   note: "Hired the crew from Main St"  # optional
 ```
@@ -298,7 +300,7 @@ Adds one use to a count-based task. This is useful when what you want to count i
 ```yaml
 action: tasks.increment_count
 data:
-  entity_id: binary_sensor.descale_coffee_machine
+  entity_id: binary_sensor.tasks_descale_coffee_machine
 ```
 
 ### `tasks.reset_count`
@@ -308,7 +310,7 @@ Resets a count-based task to zero **without** marking it done.
 ```yaml
 action: tasks.reset_count
 data:
-  entity_id: binary_sensor.descale_coffee_machine
+  entity_id: binary_sensor.tasks_descale_coffee_machine
 ```
 
 ### `tasks.snooze_task`
@@ -318,7 +320,7 @@ Silences a task's [notifications](#notifications) for a number of days (default 
 ```yaml
 action: tasks.snooze_task
 data:
-  entity_id: binary_sensor.change_hvac_filter
+  entity_id: binary_sensor.tasks_change_hvac_filter
   days: 3  # optional; defaults to 1
 ```
 
@@ -329,7 +331,7 @@ Sends the task's notification right away, whether or not it's due or snoozed. Ha
 ```yaml
 action: tasks.send_task_notification
 data:
-  entity_id: binary_sensor.change_hvac_filter
+  entity_id: binary_sensor.tasks_change_hvac_filter
 ```
 
 ### `tasks.create_task`
@@ -362,7 +364,7 @@ Makes a task due right now, for testing automations and notifications without wa
 ```yaml
 action: tasks.mark_overdue
 data:
-  entity_id: binary_sensor.change_hvac_filter
+  entity_id: binary_sensor.tasks_change_hvac_filter
 ```
 
 ## Events
@@ -401,13 +403,13 @@ automation:
       - condition: time
         weekday: sat
       - condition: state
-        entity_id: binary_sensor.any_task_due
+        entity_id: binary_sensor.tasks_any_task_due
         state: "on"
     actions:
       - action: notify.mobile_app_your_phone
         data:
-          title: "{{ state_attr('binary_sensor.any_task_due', 'due_count') }} tasks due"
-          message: "{{ state_attr('binary_sensor.any_task_due', 'due_tasks') | join(', ') }}"
+          title: "{{ state_attr('binary_sensor.tasks_any_task_due', 'due_count') }} tasks due"
+          message: "{{ state_attr('binary_sensor.tasks_any_task_due', 'due_tasks') | join(', ') }}"
 ```
 
 **React to one task coming due:**
@@ -417,7 +419,7 @@ automation:
   - alias: "Tasks: HVAC filter due"
     triggers:
       - trigger: state
-        entity_id: binary_sensor.change_hvac_filter
+        entity_id: binary_sensor.tasks_change_hvac_filter
         to: "on"
     actions:
       - action: notify.mobile_app_your_phone

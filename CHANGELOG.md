@@ -4,6 +4,24 @@ Notable changes to Tasks (formerly Home Maintenance). The Unreleased section
 is rotated into a versioned section by the release workflow and becomes the
 Highlights block of the GitHub release notes.
 
+## Unreleased
+
+- Fixed: on Home Assistant 2026.11, Tasks failed to load ("Error migrating
+  entry") if it was first set up with an early release, whose setup entry
+  still records its version as `1.1.0`. Tasks now updates the entry before
+  Home Assistant checks it.
+- Fixed: Home Assistant 2026.11 logged a deprecation warning about Tasks
+  using `CONN_CLASS_LOCAL_POLL`, which Home Assistant removes in 2027.5.
+- Changed: from Home Assistant 2026.11, new entity IDs include the device
+  name, so a task created on 2026.11 or later is
+  `binary_sensor.tasks_clean_gutters` rather than
+  `binary_sensor.clean_gutters`. Existing tasks keep their IDs, so an
+  upgraded install can have both styles; on a new install the aggregate
+  sensor is `binary_sensor.tasks_any_task_due`. Names shown on dashboards
+  also gain the device name ("Tasks Clean gutters"). If an automation or
+  template builds a task's entity ID from its title, check it against the
+  real ID.
+
 ## 2.2 — 2026-10-12
 
 - Added: Simplified Chinese (简体中文) translations for the panel, the Add

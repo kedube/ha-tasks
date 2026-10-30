@@ -3,7 +3,6 @@
 from typing import Any
 
 from homeassistant.config_entries import (
-    CONN_CLASS_LOCAL_POLL,
     ConfigEntry,
     ConfigFlow,
     ConfigFlowResult,
@@ -24,7 +23,6 @@ class TasksConfigFlow(ConfigFlow, domain=DOMAIN):
 
     # HA's contract is an int; async_migrate_entry keys off this.
     VERSION = 1
-    CONNECTION_CLASS = CONN_CLASS_LOCAL_POLL
 
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None

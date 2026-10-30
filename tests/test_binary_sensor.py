@@ -9,6 +9,8 @@ from custom_components.tasks import TasksData
 from custom_components.tasks.const import DOMAIN
 from custom_components.tasks.store import Task
 
+from . import entity_id_for
+
 
 async def test_time_task_flips_due_at_due_moment(hass, setup_entry, freezer) -> None:
     """A time-based task turns on exactly when it comes due, without polling."""
@@ -26,7 +28,8 @@ async def test_time_task_flips_due_at_due_moment(hass, setup_entry, freezer) -> 
     )
     await hass.async_block_till_done()
 
-    state = hass.states.get("binary_sensor.rotate_mattress")
+    entity_id = entity_id_for(hass, "tasks_timer")
+    state = hass.states.get(entity_id)
     assert state is not None
     assert state.state == "off"
 
@@ -35,7 +38,7 @@ async def test_time_task_flips_due_at_due_moment(hass, setup_entry, freezer) -> 
     async_fire_time_changed(hass)
     await hass.async_block_till_done()
 
-    assert hass.states.get("binary_sensor.rotate_mattress").state == "on"
+    assert hass.states.get(entity_id).state == "on"
 
 
 async def test_entity_updates_when_task_updated(hass, setup_entry) -> None:
@@ -52,19 +55,21 @@ async def test_entity_updates_when_task_updated(hass, setup_entry) -> None:
     data.store.add(task)
     await hass.async_block_till_done()
 
-    assert hass.states.get("binary_sensor.water_plants").state == "on"
+    entity_id = entity_id_for(hass, task.id)
+    assert hass.states.get(entity_id).state == "on"
 
     data.store.update_last_performed(task.id)
     await hass.async_block_till_done()
 
-    state = hass.states.get("binary_sensor.water_plants")
+    state = hass.states.get(entity_id)
     assert state.state == "off"
-    # Title edits propagate too
+    # Title edits propagate too (HA 2026.11+ prefixes the device name)
     data.store.update_task(task.id, {"title": "Water All Plants"})
     await hass.async_block_till_done()
     assert (
-        hass.states.get("binary_sensor.water_plants").attributes["friendly_name"]
-        == "Water All Plants"
+        hass.states.get(entity_id)
+        .attributes["friendly_name"]
+        .endswith("Water All Plants")
     )
 
 
@@ -89,7 +94,7 @@ async def test_runtime_task_attributes(hass, setup_entry) -> None:
     hass.states.async_set("sensor.pump_hours", "130")
     await hass.async_block_till_done()
 
-    attrs = hass.states.get("binary_sensor.service_pump").attributes
+    attrs = hass.states.get(entity_id_for(hass, "tasks_attr")).attributes
     assert attrs["trigger_type"] == "runtime"
     assert attrs["runtime_baseline"] == 100
     assert attrs["runtime_current"] == 130

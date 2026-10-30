@@ -20,6 +20,8 @@ from custom_components.tasks.notifications import (
 )
 from custom_components.tasks.store import Task
 
+from . import entity_id_for
+
 
 def make_task(**overrides) -> Task:
     """Build an overdue, notification-enabled task with sensible defaults."""
@@ -219,7 +221,7 @@ async def test_snooze_service_blocks_notifications(hass, setup_entry) -> None:
     await hass.async_block_till_done()
     assert len(calls) == 1
 
-    entity_id = "binary_sensor.change_filter"
+    entity_id = entity_id_for(hass, "tasks_notify_test")
     await hass.services.async_call(
         DOMAIN,
         SERVICE_SNOOZE_TASK,
@@ -256,7 +258,7 @@ async def test_send_task_notification_service_forces_send(hass, setup_entry) -> 
     await hass.services.async_call(
         DOMAIN,
         SERVICE_SEND_TASK_NOTIFICATION,
-        {"entity_id": "binary_sensor.change_filter"},
+        {"entity_id": entity_id_for(hass, "tasks_notify_test")},
         blocking=True,
     )
     await hass.async_block_till_done()

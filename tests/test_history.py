@@ -13,6 +13,8 @@ from custom_components.tasks.const import (
 )
 from custom_components.tasks.store import Task
 
+from . import entity_id_for
+
 TASK_ID = "tasks_history_test"
 
 
@@ -90,7 +92,7 @@ async def test_completed_event_fired(hass, setup_entry) -> None:
     assert event.data["trigger_type"] == "time"
     assert event.data["performed"] == dt_util.now().date().isoformat()
     assert event.data["note"] == "serviced"
-    assert event.data["entity_id"] == "binary_sensor.change_hvac_filter"
+    assert event.data["entity_id"] == entity_id_for(hass, TASK_ID)
 
 
 async def test_completed_event_fired_per_task_on_tag_scan(hass, setup_entry) -> None:
@@ -131,7 +133,7 @@ async def test_due_event_fired_on_transition(hass, setup_entry) -> None:
     assert len(events) == 1
     event = events[0]
     assert event.data["task_id"] == TASK_ID
-    assert event.data["entity_id"] == "binary_sensor.change_hvac_filter"
+    assert event.data["entity_id"] == entity_id_for(hass, TASK_ID)
     assert event.data["title"] == "Change HVAC Filter"
 
     # Completing it (back to not due) and making it due again fires again.
@@ -188,7 +190,7 @@ async def test_service_complete_with_note(hass, setup_entry) -> None:
         DOMAIN,
         "reset_last_performed",
         {
-            "entity_id": "binary_sensor.change_hvac_filter",
+            "entity_id": entity_id_for(hass, TASK_ID),
             "performed_date": (dt_util.now() - timedelta(days=1)).date().isoformat(),
             "note": "via service",
         },

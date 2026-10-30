@@ -12,9 +12,10 @@ The same dashboard is loaded automatically in the development environment
 (`scripts/develop`) as **Tasks Example** in the sidebar, from
 [`config/dashboards/tasks-example.yaml`](../config/dashboards/tasks-example.yaml).
 
-> Replace the example entity IDs (`binary_sensor.change_hvac_filter`, …) with
-> your own. Every task you create in the panel gets a `binary_sensor` named
-> after its title.
+> Replace the example entity IDs (`binary_sensor.tasks_change_hvac_filter`, …)
+> with your own. Every task you create in the panel gets a `binary_sensor`
+> named after its title: `binary_sensor.tasks_<title>` since Home Assistant
+> 2026.11, or `binary_sensor.<title>` for tasks created on earlier versions.
 
 ## Quick start: one card
 
@@ -75,10 +76,10 @@ sections:
       - type: entities
         title: Key tasks
         entities:
-          - binary_sensor.change_hvac_filter
-          - binary_sensor.clean_gutters
-          - binary_sensor.test_smoke_alarms
-          - binary_sensor.descale_coffee_machine
+          - binary_sensor.tasks_change_hvac_filter
+          - binary_sensor.tasks_clean_gutters
+          - binary_sensor.tasks_test_smoke_alarms
+          - binary_sensor.tasks_descale_coffee_machine
 
   # ── Coming up: projected due dates ────────────────────────────────────
   - type: grid

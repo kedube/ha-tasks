@@ -11,6 +11,8 @@ from custom_components.tasks.store import (
 )
 from custom_components.tasks.triggers import get_trigger
 
+from . import entity_id_for
+
 # April through October, e.g. lawn care.
 SEASON = [4, 5, 6, 7, 8, 9, 10]
 
@@ -188,16 +190,18 @@ async def test_sensor_flips_on_at_season_start(hass, setup_entry, freezer) -> No
     data.store.add(make_task(last_performed=local(2026, 10, 1).isoformat()))
     await hass.async_block_till_done()
 
-    assert hass.states.get("binary_sensor.mow_lawn").state == "off"
-    assert hass.states.get("binary_sensor.any_task_due").state == "off"
+    task_entity_id = entity_id_for(hass, "tasks_seasonal_test")
+    any_due_entity_id = entity_id_for(hass, f"{DOMAIN}_any_task_due")
+    assert hass.states.get(task_entity_id).state == "off"
+    assert hass.states.get(any_due_entity_id).state == "off"
 
     # Cross the season boundary; the scheduled transition timers must fire.
     freezer.move_to(local(2027, 4, 1) + timedelta(minutes=1))
     async_fire_time_changed(hass)
     await hass.async_block_till_done()
 
-    assert hass.states.get("binary_sensor.mow_lawn").state == "on"
-    assert hass.states.get("binary_sensor.any_task_due").state == "on"
+    assert hass.states.get(task_entity_id).state == "on"
+    assert hass.states.get(any_due_entity_id).state == "on"
 
 
 async def test_sensor_flips_off_at_season_end(hass, setup_entry, freezer) -> None:
@@ -211,12 +215,13 @@ async def test_sensor_flips_off_at_season_end(hass, setup_entry, freezer) -> Non
     data: TasksData = hass.data[DOMAIN]
     data.store.add(make_task(last_performed=local(2026, 10, 1).isoformat()))
     await hass.async_block_till_done()
-    assert hass.states.get("binary_sensor.mow_lawn").state == "on"
+    entity_id = entity_id_for(hass, "tasks_seasonal_test")
+    assert hass.states.get(entity_id).state == "on"
 
     freezer.move_to(local(2026, 11, 1) + timedelta(minutes=1))
     async_fire_time_changed(hass)
     await hass.async_block_till_done()
-    assert hass.states.get("binary_sensor.mow_lawn").state == "off"
+    assert hass.states.get(entity_id).state == "off"
 
 
 async def test_todo_item_not_pending_out_of_season(hass, setup_entry, freezer) -> None:

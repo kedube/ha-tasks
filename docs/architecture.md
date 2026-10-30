@@ -68,7 +68,7 @@ The store, entities, and websocket serialization all call through `get_trigger(t
 
 Entities are thin views over the store's task objects (`_attr_should_poll = False`). They subscribe to `SIGNAL_TASK_UPDATED` and rewrite their state when their task changes. Time-based tasks additionally schedule an `async_track_point_in_time` callback at their due moment so the state flips exactly on time rather than on a poll. The platform (not the store) listens for `SIGNAL_TASK_ADDED`/`_REMOVED` to create entities and clean up the entity registry.
 
-The platform also creates one aggregate `AnyTaskDueSensor` (`binary_sensor.any_task_due`), on while any task is due. It refreshes on `SIGNAL_TASKS_CHANGED` and schedules its own wall-clock callback at the earliest upcoming due moment, since a task turning due purely by time fires no dispatcher signal.
+The platform also creates one aggregate `AnyTaskDueSensor` (unique ID `tasks_any_task_due`; entity `binary_sensor.tasks_any_task_due`, or `binary_sensor.any_task_due` if created before HA 2026.11), on while any task is due. It refreshes on `SIGNAL_TASKS_CHANGED` and schedules its own wall-clock callback at the earliest upcoming due moment, since a task turning due purely by time fires no dispatcher signal.
 
 ### `__init__.py` — setup, watchers, services
 
@@ -146,7 +146,7 @@ The version lives in `const.py` (`VERSION`) and `manifest.json`, kept in lockste
 - `test_config_flow.py` — config and options flows
 - `test_release_scripts.py` — the release automation scripts
 
-The panel registration is stubbed in the `setup_entry` fixture (`tests/conftest.py`) so backend tests don't need the HTTP stack; `home-assistant-frontend` is still installed because the manifest's `panel_custom` dependency makes HA import it during setup. A weekly non-blocking CI job (`ha-next`) reruns the suite against the newest Home Assistant pre-release as an early warning for upstream breaking changes.
+Tests look up a sensor's entity ID with `entity_id_for` (`tests/__init__.py`) instead of spelling it out, because new entity IDs depend on the Home Assistant version (2026.11 added the device-name prefix). The panel registration is stubbed in the `setup_entry` fixture (`tests/conftest.py`) so backend tests don't need the HTTP stack; `home-assistant-frontend` is still installed because the manifest's `panel_custom` dependency makes HA import it during setup. A weekly non-blocking CI job (`ha-next`) reruns the suite against the newest Home Assistant pre-release as an early warning for upstream breaking changes.
 
 ### Browser smoke test
 

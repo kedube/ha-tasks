@@ -94,7 +94,25 @@ type TasksConfigEntry = ConfigEntry[TasksData]
 
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     """Track states and offer events for sensors."""
+    # HA runs this before it sets up (and so migrates) the stored entries.
+    for entry in hass.config_entries.async_entries(const.DOMAIN):
+        _async_normalize_entry_version(hass, entry)
     return True
+
+
+@callback
+def _async_normalize_entry_version(hass: HomeAssistant, entry: ConfigEntry) -> None:
+    """
+    Store the current int VERSION on an entry that carries a string one.
+
+    Entries created before the config-flow VERSION became an int carry a
+    string version ("1.1.0"). Since 2026.11, HA's migrate step compares the
+    stored version with > before dispatching to async_migrate_entry, which
+    raises TypeError on a string and leaves the entry unloaded — so this has
+    to happen in async_setup, before HA reaches the migrate step.
+    """
+    if not isinstance(entry.version, int):
+        hass.config_entries.async_update_entry(entry, version=TasksConfigFlow.VERSION)
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: TasksConfigEntry) -> bool:
@@ -242,13 +260,10 @@ async def async_migrate_entry(
     """
     Handle migration of config entry.
 
-    Entries created before the config-flow VERSION became an int carry a
-    string version ("1.1.0"). HA's migrate step compares versions with ==
-    (so no crash) and dispatches here; normalize the stored version to the
-    current int so the entry stops re-migrating on every startup.
+    Legacy string versions are normalized in async_setup, before HA gets
+    here; this stays as a fallback for entries set up any other way.
     """
-    if not isinstance(entry.version, int):
-        hass.config_entries.async_update_entry(entry, version=TasksConfigFlow.VERSION)
+    _async_normalize_entry_version(hass, entry)
     return True
 
 
