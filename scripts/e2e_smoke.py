@@ -208,6 +208,13 @@ FATAL_JS_ERROR = re.compile(
     r"TypeError|ReferenceError|SyntaxError|RangeError|not a function|is not defined"
 )
 
+# HA's frontend reloads the page when its service worker first takes control
+# (controllerchange -> location.reload()). On a fresh browser profile that
+# lands a few seconds in — mid-test, wiping whatever dialog is open. Hiding
+# the API makes HA skip registration. Playwright's service_workers="block"
+# isn't enough: register() then resolves to undefined and HA throws on it.
+NO_SERVICE_WORKER_JS = "delete Navigator.prototype.serviceWorker;"
+
 
 def drive_panel(base: str, errors: list[str], warnings: list[str]) -> None:
     """Exercise the panel in a real browser, appending to errors/warnings.
@@ -233,6 +240,7 @@ def drive_panel(base: str, errors: list[str], warnings: list[str]) -> None:
         page = browser.new_page(viewport={"width": 1400, "height": 950})
         page.on("pageerror", on_pageerror)
         page.on("console", on_console)
+        page.add_init_script(NO_SERVICE_WORKER_JS)
         try:
             _exercise_panel(page, base, errors)
         finally:
