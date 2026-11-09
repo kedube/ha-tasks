@@ -11,7 +11,9 @@ happened with mwc-button in #122 and ha-textfield in 1.5.16).
 
 Usage: python scripts/e2e_smoke.py [--port 8129] [--keep]
 Requires: homeassistant and playwright installed in the current environment,
-plus a chromium (``playwright install chromium``) or system Chrome. Set
+plus a chromium (``playwright install chromium``) or system Chrome. Home
+Assistant 2026.11+ refuses to start outside a virtual environment or a
+container, so run this from a venv (or point HASS_PYTHON at one). Set
 HASS_PYTHON to launch Home Assistant from a different interpreter than the
 one running playwright.
 """
@@ -122,10 +124,15 @@ def request(
     return json.loads(raw) if raw else None
 
 
-def wait_for_ha(base: str, timeout: int = 420) -> None:
+def wait_for_ha(base: str, proc: subprocess.Popen, timeout: int = 420) -> None:
     """Poll until the Home Assistant HTTP server responds."""
     deadline = time.time() + timeout
     while time.time() < deadline:
+        # Fail fast if HA refused to start (e.g. HA 2026.11+ exits outright
+        # outside a venv) instead of polling a dead port for the full timeout.
+        if proc.poll() is not None:
+            msg = f"Home Assistant exited during boot (code {proc.returncode})"
+            raise RuntimeError(msg)
         try:
             urllib.request.urlopen(base + "/", timeout=5)
         except Exception:  # noqa: BLE001 - retry until the server is up
@@ -369,7 +376,7 @@ def main() -> int:
         )
         try:
             print("waiting for Home Assistant to boot...")
-            wait_for_ha(base)
+            wait_for_ha(base, proc)
             print("onboarding...")
             token = onboard(base)
             print("adding the tasks integration...")

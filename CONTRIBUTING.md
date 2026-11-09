@@ -66,7 +66,10 @@ python -m pytest
 
 The **browser smoke test** catches what pytest can't. It boots a throwaway Home Assistant with the integration and completes onboarding through the API. Then it logs in with headless Chrome, adds a task, and creates a group. It fails if any form field stops rendering or any flow breaks:
 
+Run it from a virtual environment: Home Assistant 2026.11+ refuses to start outside one (or a container).
+
 ```sh
+python -m venv .venv && . .venv/bin/activate
 pip install homeassistant colorlog playwright
 python -m playwright install chromium
 python scripts/e2e_smoke.py --install-deps

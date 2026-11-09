@@ -108,6 +108,13 @@ jobs:
         with:
           python-version: "3.14"
 
+      # HA 2026.11+ refuses to start outside a venv or container; the smoke
+      # step below launches it, so run the whole job from a venv.
+      - name: Create virtual environment
+        run: |
+          python -m venv "$RUNNER_TEMP/venv"
+          echo "$RUNNER_TEMP/venv/bin" >> "$GITHUB_PATH"
+
       - name: Install test dependencies
         run: pip install -r requirements_test.txt
 
@@ -120,12 +127,16 @@ jobs:
       - name: Run tests against HA next
         run: python -m pytest -q
 
+      # The smoke test needs no pytest-homeassistant-custom-component, so it
+      # still gives a real signal when that harness lags a new HA release.
       - name: Install playwright
+        if: ${{ !cancelled() }}
         run: |
           pip install playwright
           python -m playwright install --with-deps chromium
 
       - name: Browser smoke test against HA next
+        if: ${{ !cancelled() }}
         run: python scripts/e2e_smoke.py --install-deps
 
   # The only check that exercises the real frontend: boots HA, logs in with
@@ -144,6 +155,12 @@ jobs:
         with:
           python-version: "3.14"
           cache: pip
+
+      # HA 2026.11+ refuses to start outside a venv or container.
+      - name: Create virtual environment
+        run: |
+          python -m venv "$RUNNER_TEMP/venv"
+          echo "$RUNNER_TEMP/venv/bin" >> "$GITHUB_PATH"
 
       - name: Install Home Assistant and playwright
         run: pip install homeassistant colorlog playwright
