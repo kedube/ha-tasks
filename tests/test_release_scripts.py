@@ -173,3 +173,64 @@ def test_release_notes_compare_against_the_highest_older_release(
 
     notes = _generate_notes(tmp_path, monkeypatch, capsys, "1.5")
     assert "patch-era entry" not in notes
+
+
+def _commit_files(cwd: Path, message: str, *paths: str) -> None:
+    for path in paths:
+        target = cwd / path
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(f"{path} {message}\n")
+    _git(cwd, "add", "-A")
+    _git(cwd, "commit", "-qm", message)
+
+
+def _releasable(tmp_path, monkeypatch, capsys) -> str:
+    monkeypatch.chdir(tmp_path)
+    load_script("has_releasable_changes").main()
+    return capsys.readouterr().out.strip()
+
+
+def test_dependency_ci_and_docs_changes_do_not_release(
+    tmp_path, monkeypatch, capsys
+) -> None:
+    _git(tmp_path, "init", "-q")
+    _commit_files(tmp_path, "initial", "custom_components/tasks/__init__.py")
+    _git(tmp_path, "tag", "2.9")
+    _commit_files(tmp_path, "pip bump", "requirements.txt")
+    _commit_files(tmp_path, "actions bump", ".github/workflows/release.yml")
+    _commit_files(
+        tmp_path,
+        "npm bump",
+        "custom_components/tasks/panel/package.json",
+        "custom_components/tasks/panel/package-lock.json",
+    )
+    _commit_files(tmp_path, "rebuild", "custom_components/tasks/panel/dist/main.js")
+    _commit_files(tmp_path, "Fix CI", "scripts/e2e_smoke.py", "CONTRIBUTING.md")
+    _commit_files(tmp_path, "tests", "tests/test_x.py", "README.md")
+
+    assert _releasable(tmp_path, monkeypatch, capsys) == "false"
+
+
+def test_user_facing_changes_release(tmp_path, monkeypatch, capsys) -> None:
+    _git(tmp_path, "init", "-q")
+    _commit_files(tmp_path, "initial", "custom_components/tasks/__init__.py")
+    _git(tmp_path, "tag", "v1.5.27")
+    _git(tmp_path, "tag", "2.9")
+    _commit_files(tmp_path, "pip bump", "requirements.txt")
+    assert _releasable(tmp_path, monkeypatch, capsys) == "false"
+
+    for path in (
+        "custom_components/tasks/sensor.py",
+        "custom_components/tasks/panel/src/app.ts",
+        "custom_components/tasks/translations/en.json",
+        "hacs.json",
+    ):
+        _git(tmp_path, "tag", "-f", "2.9")
+        _commit_files(tmp_path, f"change {path}", path)
+        assert _releasable(tmp_path, monkeypatch, capsys) == "true", path
+
+
+def test_untagged_repository_releases(tmp_path, monkeypatch, capsys) -> None:
+    _git(tmp_path, "init", "-q")
+    _commit_files(tmp_path, "initial", "README.md")
+    assert _releasable(tmp_path, monkeypatch, capsys) == "true"

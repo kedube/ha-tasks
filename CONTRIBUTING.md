@@ -117,12 +117,14 @@ Every push and pull request runs the **CI** workflow:
 
 A weekly, non-blocking **HA next** job runs pytest and the smoke test against the newest Home Assistant pre-release, as an early warning of upstream breaking changes. Dependabot keeps the panel's npm dependencies current, and its pull requests get the bundles rebuilt automatically.
 
-When CI passes on `main`, the **Release** workflow:
+When CI passes on `main` and something users install has changed since the last release — anything in `custom_components/tasks/` apart from the panel's build tooling and committed bundles, or `hacs.json` — the **Release** workflow:
 
 1. bumps the version by 0.1 (in `const.py` and `manifest.json` together). Versions are `X.Y`, and after `.9` they roll over to the next whole number: 1.8 → 1.9 → 2.0.
 2. turns the `Unreleased` section of [CHANGELOG.md](CHANGELOG.md) into that version's notes
 3. tags the bare version, such as `1.9`, with no `v` prefix
 4. publishes a GitHub release with the same name and `tasks.zip` attached
+
+Pushes that only touch dependencies, CI, tests or docs (including dependabot's pull requests and their rebuilt panel bundles) don't release on their own; they ship with the next release that has a user-facing change. To release one anyway, run the workflow by hand and pick **minor**.
 
 To jump to the next whole number (1.6 → 2.0), or to re-release the current version, run the workflow by hand from its **Run workflow** menu and pick **major** or **none**.
 
