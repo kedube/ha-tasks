@@ -4,7 +4,7 @@ Notable changes to Tasks (formerly Home Maintenance). The Unreleased section
 is rotated into a versioned section by the release workflow and becomes the
 Highlights block of the GitHub release notes.
 
-## Unreleased
+## 3.1 — 2026-11-17
 
 - Fixed: a task given a far-future date (such as a `performed_date` of
   9999-12-31) or a runtime threshold of `inf`/`nan` broke every task entity
