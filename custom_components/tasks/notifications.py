@@ -15,6 +15,7 @@ import logging
 from datetime import timedelta
 from typing import TYPE_CHECKING, Any
 
+import voluptuous as vol
 from homeassistant.core import Event, HomeAssistant, callback
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
@@ -28,6 +29,7 @@ from .triggers import get_trigger
 if TYPE_CHECKING:
     from datetime import datetime
 
+    from homeassistant.config_entries import ConfigEntry
     from homeassistant.core import CALLBACK_TYPE
 
     from .store import Task, TaskStore
@@ -35,6 +37,28 @@ if TYPE_CHECKING:
 _LOGGER = logging.getLogger(__name__)
 
 MOBILE_APP_ACTION_EVENT = "mobile_app_notification_action"
+
+# A notify call that hasn't returned by then counts as failed. Without a bound,
+# one hung notify service held the processing lock forever.
+SEND_TIMEOUT = 30
+
+# Failures a notify target can raise for a bad payload or a hung call, besides
+# HomeAssistantError: a non-notify target (e.g. persistent_notification.create,
+# which the panel accepts as a custom value) rejects the payload's "data" key
+# with vol.Invalid.
+_SEND_ERRORS = (HomeAssistantError, vol.Invalid, TimeoutError)
+
+_ACTION_PREFIXES = (
+    f"{const.NOTIFICATION_ACTION_COMPLETE}::",
+    f"{const.NOTIFICATION_ACTION_SNOOZE}::",
+)
+
+
+@callback
+def _mobile_action_filter(event_data: dict[str, Any]) -> bool:
+    """Only let this integration's notification actions reach the handler."""
+    action = event_data.get("action")
+    return isinstance(action, str) and action.startswith(_ACTION_PREFIXES)
 
 
 def parse_notification_time(value: str | None) -> tuple[int, int]:
@@ -62,13 +86,21 @@ def resolve_notify_service(value: str | None) -> tuple[str, str]:
 class NotificationManager:
     """Send per-task notifications and handle mobile notification actions."""
 
-    def __init__(self, hass: HomeAssistant, store: TaskStore) -> None:
+    def __init__(
+        self, hass: HomeAssistant, store: TaskStore, entry: ConfigEntry
+    ) -> None:
         """Initialize the notification manager."""
         self.hass = hass
         self._store = store
+        self._entry = entry
         # Serializes processing passes so an in-flight (awaiting) send can't
         # overlap with a second pass and double-send the same task/kind/day.
         self._lock = asyncio.Lock()
+        # The scheduled pass, and whether another was requested while it was
+        # pending or running: requests coalesce into one more pass instead of
+        # queueing a task each (count/runtime ticks fire many change signals).
+        self._pass_task: asyncio.Task[None] | None = None
+        self._rerun = False
         # Tasks whose last send failed, with the day it failed on, so a broken
         # notify target is retried at most once per day instead of every tick.
         self._send_failed_on: dict[str, str] = {}
@@ -84,7 +116,9 @@ class NotificationManager:
                 self.hass, self._schedule_processing, minute="*", second=0
             ),
             self.hass.bus.async_listen(
-                MOBILE_APP_ACTION_EVENT, self._handle_mobile_action
+                MOBILE_APP_ACTION_EVENT,
+                self._handle_mobile_action,
+                event_filter=_mobile_action_filter,
             ),
             self.hass.bus.async_listen(
                 const.EVENT_TASK_COMPLETED, self._handle_task_completed
@@ -100,15 +134,45 @@ class NotificationManager:
         # task has notifications enabled — the common case for most installs.
         if not any(t.notifications_enabled for t in self._store.tasks.values()):
             return
-        self.hass.async_create_task(self.async_process_notifications())
+        if self._pass_task is not None and not self._pass_task.done():
+            self._rerun = True
+            return
+        # Entry-scoped: cancelled on unload, so a pass blocked on a slow send
+        # can't resume after a reload and write to the old, unloaded store
+        # (which re-sent the notification and left a stale save pending).
+        self._pass_task = self._entry.async_create_background_task(
+            self.hass, self.async_process_notifications(), "tasks_notifications"
+        )
 
     async def async_process_notifications(self) -> None:
         """Send any notifications that are currently due (one pass at a time)."""
         # The lock makes overlapping passes run sequentially, so the second
         # pass sees the last_notification_date the first one just committed.
         async with self._lock:
-            for task_id in list(self._store.tasks):
-                await self.async_send_notification(task_id)
+            while True:
+                self._rerun = False
+                self._prune_send_failures()
+                for task_id in list(self._store.tasks):
+                    await self._async_process_task(task_id)
+                if not self._rerun:
+                    return
+
+    async def _async_process_task(self, task_id: str) -> None:
+        """Process one task, so a failure can't starve the tasks after it."""
+        try:
+            await self.async_send_notification(task_id)
+        except Exception:  # one bad task must not starve the rest
+            _LOGGER.exception("Unexpected error notifying for task %s", task_id)
+            self._send_failed_on[task_id] = dt_util.now().date().isoformat()
+
+    def _prune_send_failures(self) -> None:
+        """Forget failures from earlier days and for deleted tasks."""
+        today = dt_util.now().date().isoformat()
+        self._send_failed_on = {
+            task_id: day
+            for task_id, day in self._send_failed_on.items()
+            if day == today and task_id in self._store.tasks
+        }
 
     async def async_send_notification(
         self, task_id: str, *, force: bool = False
@@ -138,17 +202,18 @@ class NotificationManager:
 
         domain, service = resolve_notify_service(task.notification_target)
         try:
-            await self.hass.services.async_call(
-                domain,
-                service,
-                {
-                    "title": task.title,
-                    "message": self._build_message(task, kind, days_until_due),
-                    "data": self._build_payload(task),
-                },
-                blocking=True,
-            )
-        except HomeAssistantError as err:
+            async with asyncio.timeout(SEND_TIMEOUT):
+                await self.hass.services.async_call(
+                    domain,
+                    service,
+                    {
+                        "title": task.title,
+                        "message": self._build_message(task, kind, days_until_due),
+                        "data": self._build_payload(task),
+                    },
+                    blocking=True,
+                )
+        except _SEND_ERRORS as err:
             # One concise warning per failure day, not a per-minute traceback.
             if self._send_failed_on.get(task_id) != today:
                 _LOGGER.warning(
@@ -156,7 +221,7 @@ class NotificationManager:
                     task_id,
                     domain,
                     service,
-                    err,
+                    str(err) or type(err).__name__,  # TimeoutError has no text
                 )
             if not force:
                 self._send_failed_on[task_id] = today
@@ -221,16 +286,17 @@ class NotificationManager:
         if domain != "notify" or not service.startswith("mobile_app"):
             return
         try:
-            await self.hass.services.async_call(
-                domain,
-                service,
-                {
-                    "message": "clear_notification",
-                    "data": {"tag": f"{const.DOMAIN}_{task.id}"},
-                },
-                blocking=True,
-            )
-        except HomeAssistantError as err:
+            async with asyncio.timeout(SEND_TIMEOUT):
+                await self.hass.services.async_call(
+                    domain,
+                    service,
+                    {
+                        "message": "clear_notification",
+                        "data": {"tag": f"{const.DOMAIN}_{task.id}"},
+                    },
+                    blocking=True,
+                )
+        except _SEND_ERRORS as err:
             _LOGGER.debug(
                 "Could not dismiss notification for task %s via %s.%s: %s",
                 task.id,
@@ -239,14 +305,13 @@ class NotificationManager:
                 err,
             )
 
-    async def _handle_mobile_action(self, event: Event) -> None:
+    @callback
+    def _handle_mobile_action(self, event: Event) -> None:
         """Handle complete/snooze actions from mobile app notifications."""
-        action = event.data.get("action")
-        if not isinstance(action, str):
-            return
-
-        complete_prefix = f"{const.NOTIFICATION_ACTION_COMPLETE}::"
-        snooze_prefix = f"{const.NOTIFICATION_ACTION_SNOOZE}::"
+        # Never awaits, so a callback: as an async handler, every action event
+        # from any integration spawned a task just to be ignored.
+        action: str = event.data["action"]  # str with our prefix (event_filter)
+        complete_prefix, snooze_prefix = _ACTION_PREFIXES
 
         if action.startswith(complete_prefix):
             task_id = action.removeprefix(complete_prefix)
@@ -283,6 +348,10 @@ class NotificationManager:
             and days_until_due > 0
         ):
             return ("due_soon", days_until_due)
+        if days_until_due <= 0 and not trigger.is_due(self.hass, task, next_due):
+            # A seasonal task out of season keeps its past due date but reads
+            # not-due (the occurrence resurfaces next season) — don't nag.
+            return (None, days_until_due)
         if days_until_due == 0 and task.notify_when in ("due", "due_and_overdue"):
             return ("due", days_until_due)
         if days_until_due < 0 and task.notify_when in ("overdue", "due_and_overdue"):

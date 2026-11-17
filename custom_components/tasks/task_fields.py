@@ -9,17 +9,41 @@ add-task constructor.
 
 from __future__ import annotations
 
-import voluptuous as vol
+import math
+import re
 
-from .const import MAX_STRING_LENGTH, NOTIFICATION_URL_SCHEMES, NOTIFY_WHEN_OPTIONS
+import voluptuous as vol
+from homeassistant.helpers import config_validation as cv
+
+from .const import (
+    DEFAULT_NOTIFICATION_TIME,
+    MAX_STRING_LENGTH,
+    NOTIFICATION_URL_SCHEMES,
+    NOTIFY_WHEN_OPTIONS,
+)
+from .triggers import MAX_INTERVAL_VALUES
 
 TRIGGER_TYPES = ["time", "date", "count", "runtime"]
 INTERVAL_TYPES = ["days", "weeks", "months", "years"]
 
+
+def _not_none(value: object) -> object:
+    """Reject None, which Coerce(str) would otherwise store as "None"."""
+    if value is None:
+        msg = "value is required"
+        raise vol.Invalid(msg)
+    return value
+
+
 # Shared length-bounded string validators, used across the field map and the
 # websocket layer's free-text fields (e.g. history notes).
-bounded_str = vol.All(vol.Coerce(str), vol.Length(max=MAX_STRING_LENGTH))
+bounded_str = vol.All(_not_none, vol.Coerce(str), vol.Length(max=MAX_STRING_LENGTH))
 bounded_str_or_none = vol.Any(None, bounded_str)
+
+# Entity references. cv.entity_id validates the format and lowercases it:
+# Home Assistant tracks state changes by lowercase id, so a mixed-case id
+# would never match an event and the trigger would silently never advance.
+entity_id_or_none = vol.Any(None, "", vol.All(bounded_str, cv.entity_id))
 
 # Labels ride along with add/update (they live on the entity registry, not
 # the task). Bounded so one call cannot bloat the registry entry.
@@ -66,6 +90,37 @@ def _notification_url(value: object) -> str | None:
     return text
 
 
+_TIME_RE = re.compile(r"^(\d{1,2}):(\d{2})(?::(\d{2}))?$")
+
+
+def _notification_time(value: object) -> str:
+    """
+    Validate a 24-hour HH:MM[:SS] send time; blank means the default.
+
+    Anything else ("9:00 PM", "25:00") used to be stored as-is and then
+    silently sent at 09:00, or never.
+    """
+    if value in (None, ""):
+        return DEFAULT_NOTIFICATION_TIME
+    text = str(value).strip()
+    match = _TIME_RE.match(text)
+    if match is None or not (
+        int(match[1]) < 24 and int(match[2]) < 60 and int(match[3] or 0) < 60
+    ):
+        msg = "notification_time must be a 24-hour HH:MM time"
+        raise vol.Invalid(msg)
+    return text
+
+
+def _finite_float(value: object) -> float:
+    """Coerce to float, rejecting NaN and infinity (they persist as null)."""
+    number = vol.Coerce(float)(value)
+    if not math.isfinite(number):
+        msg = "must be a finite number"
+        raise vol.Invalid(msg)
+    return number
+
+
 # Each entry maps a task field to its voluptuous validator. This drives the
 # add_task schema, UPDATES_SCHEMA, and ALLOWED_UPDATE_FIELDS. "labels" is
 # handled separately (it lives on the entity registry, not the task).
@@ -74,23 +129,28 @@ TASK_FIELD_VALIDATORS: dict[str, object] = {
     "trigger_type": vol.In(TRIGGER_TYPES),
     # min 1: a zero/negative interval would make a time task permanently due
     # (next_due = last_performed) — the panel enforces this, the API must too.
-    "interval_value": vol.All(vol.Coerce(int), vol.Range(min=1)),
+    # The per-unit 100-year cap is checked by the trigger's validate().
+    "interval_value": vol.All(
+        vol.Coerce(int), vol.Range(min=1, max=max(MAX_INTERVAL_VALUES.values()))
+    ),
     "interval_type": vol.In(INTERVAL_TYPES),
     "last_performed": vol.Any(str, None),
     "anchor_date": bounded_str_or_none,
     "active_months": _active_months,
     "icon": bounded_str_or_none,
-    "tag_id": bounded_str_or_none,
+    "tag_id": entity_id_or_none,
     "area_id": bounded_str_or_none,
     "description": bounded_str_or_none,
-    "count_entity_id": bounded_str_or_none,
-    "count_threshold": vol.Coerce(int),
-    "runtime_entity_id": bounded_str_or_none,
-    "runtime_threshold": vol.Coerce(float),
+    "count_entity_id": entity_id_or_none,
+    # The panel sends 0 for tasks that are not count/runtime-based; the
+    # trigger's validate() requires a positive value where it matters.
+    "count_threshold": vol.All(vol.Coerce(int), vol.Range(min=0)),
+    "runtime_entity_id": entity_id_or_none,
+    "runtime_threshold": vol.All(_finite_float, vol.Range(min=0)),
     "group_id": bounded_str_or_none,
     "notifications_enabled": bool,
     "notification_target": bounded_str_or_none,
-    "notification_time": bounded_str,
+    "notification_time": _notification_time,
     "notification_url": _notification_url,
     "notify_when": vol.In(NOTIFY_WHEN_OPTIONS),
     "notify_days_before_due": vol.Any(None, vol.Coerce(int)),

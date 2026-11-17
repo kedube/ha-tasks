@@ -114,6 +114,23 @@ const intervalTypeField = (lang: string) => ({
     },
 });
 
+// A count task counts off -> on transitions, so only domains whose entities
+// report on/off can drive one. Picking a cover or lock (open/closed,
+// locked/unlocked) used to be allowed and then silently never counted.
+export const COUNT_ENTITY_DOMAINS = [
+    "binary_sensor",
+    "fan",
+    "group",
+    "humidifier",
+    "input_boolean",
+    "light",
+    "media_player",
+    "remote",
+    "script",
+    "siren",
+    "switch",
+];
+
 const triggerFields = (formData: TaskFormData, lang: string): any[] => {
     if (formData.trigger_type === "date") {
         return [
@@ -124,7 +141,7 @@ const triggerFields = (formData: TaskFormData, lang: string): any[] => {
     }
     if (formData.trigger_type === "count") {
         return [
-            { name: "count_entity_id", required: true, selector: { entity: {} }, },
+            { name: "count_entity_id", required: true, selector: { entity: { filter: { domain: COUNT_ENTITY_DOMAINS } } }, },
             { name: "count_threshold", required: true, selector: { number: { min: 1, mode: "box" } }, },
         ];
     }

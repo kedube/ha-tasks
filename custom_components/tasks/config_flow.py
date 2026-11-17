@@ -7,6 +7,7 @@ from homeassistant.config_entries import (
     ConfigFlow,
     ConfigFlowResult,
     OptionsFlow,
+    OptionsFlowWithReload,
 )
 from homeassistant.core import callback
 
@@ -51,12 +52,14 @@ class TasksConfigFlow(ConfigFlow, domain=DOMAIN):
         return TasksOptionsFlowHandler()
 
 
-class TasksOptionsFlowHandler(OptionsFlow):
+class TasksOptionsFlowHandler(OptionsFlowWithReload):
     """
     Options flow for Home Maintenenance.
 
     config_entry is provided by the OptionsFlow base class; assigning it
     manually has been an error since HA made it a read-only property.
+    OptionsFlowWithReload reloads the entry once the changed options are
+    saved, so the flow doesn't fire off its own untracked reload task.
     """
 
     async def async_step_init(
@@ -64,11 +67,7 @@ class TasksOptionsFlowHandler(OptionsFlow):
     ) -> ConfigFlowResult:
         """Handle a flow initialized by the user."""
         if user_input is not None:
-            result = self.async_create_entry(title="", data=user_input)
-            self.hass.async_create_task(
-                self.hass.config_entries.async_reload(self.config_entry.entry_id)
-            )
-            return result
+            return self.async_create_entry(title="", data=user_input)
 
         return self.async_show_form(
             step_id="init",

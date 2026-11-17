@@ -1,6 +1,7 @@
 """Store Tasks configuration."""
 
 import logging
+import math
 import uuid
 from datetime import datetime
 from typing import Any
@@ -17,7 +18,7 @@ from .datetime_utils import (
     normalize_last_performed,
 )
 from .task_fields import ADD_TASK_FIELDS, ALLOWED_UPDATE_FIELDS
-from .triggers import get_trigger
+from .triggers import get_trigger, max_interval_value
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -132,10 +133,88 @@ def new_task_from_fields(fields: dict[str, Any]) -> Task | None:
 
 def normalize_group_id(group_id: str | None) -> str | None:
     """Normalize a group name to its canonical stored value."""
-    if group_id is None:
+    if not isinstance(group_id, str):
         return None
     normalized = group_id.strip()
     return normalized or None
+
+
+def _without_history(attribute: attr.Attribute, _value: object) -> bool:
+    """attr.asdict filter that skips the (possibly unbounded) history list."""
+    return attribute.name != "history"
+
+
+def _as_int(value: object, default: int | None, minimum: int | None = 0) -> int | None:
+    """Coerce a stored value to int, or return the default when it can't be."""
+    if isinstance(value, bool):
+        return default
+    try:
+        number = int(value)  # type: ignore[arg-type]
+    except (TypeError, ValueError, OverflowError):
+        return default
+    return number if minimum is None or number >= minimum else default
+
+
+def _as_finite_float(
+    value: object, default: float | None, minimum: float | None = None
+) -> float | None:
+    """Coerce a stored value to a finite float, or return the default."""
+    if isinstance(value, bool):
+        return default
+    try:
+        number = float(value)  # type: ignore[arg-type]
+    except (TypeError, ValueError):
+        return default
+    if not math.isfinite(number) or (minimum is not None and number < minimum):
+        return default
+    return number
+
+
+def _as_entity_id(value: object) -> str | None:
+    """Return a stored entity reference lowercased, as state events carry it."""
+    return value.lower() if isinstance(value, str) else None
+
+
+def _repair_loaded_task(task: Task) -> None:
+    """
+    Coerce fields that corrupt or pre-validation storage may hold.
+
+    Every value here is read on every render, so one bad field (a null
+    threshold — NaN and infinity are persisted as null — or a non-string
+    group) used to crash entity setup and the panel for all tasks.
+    """
+    interval_type = task.interval_type
+    repaired: dict[str, object] = {
+        "title": task.title if isinstance(task.title, str) else str(task.title),
+        "interval_value": min(
+            _as_int(task.interval_value, 1, minimum=1) or 1,
+            max_interval_value(interval_type),
+        ),
+        "count_threshold": _as_int(task.count_threshold, 0),
+        "current_count": _as_int(task.current_count, 0),
+        "runtime_threshold": _as_finite_float(task.runtime_threshold, 0.0, 0.0),
+        "runtime_baseline": _as_finite_float(task.runtime_baseline, None),
+        "notify_days_before_due": _as_int(
+            task.notify_days_before_due, None, minimum=None
+        ),
+        "group_id": task.group_id if isinstance(task.group_id, str) else None,
+        "notification_time": (
+            task.notification_time
+            if isinstance(task.notification_time, str)
+            else const.DEFAULT_NOTIFICATION_TIME
+        ),
+        "count_entity_id": _as_entity_id(task.count_entity_id),
+        "runtime_entity_id": _as_entity_id(task.runtime_entity_id),
+        "tag_id": _as_entity_id(task.tag_id),
+    }
+    for name, value in repaired.items():
+        current = getattr(task, name)
+        # != (not identity): 100 vs 100.0 is fine; NaN != NaN is repaired.
+        if value != current:
+            _LOGGER.warning(
+                "Repaired stored task %s: %s %r -> %r", task.id, name, current, value
+            )
+            setattr(task, name, value)
 
 
 class _TaskStorage(storage.Store):
@@ -196,9 +275,17 @@ class TaskStore:
         if isinstance(data, list):
             task_items = data
             group_items: list[str] = []
-        else:
+        elif isinstance(data, dict):
             task_items = data.get("tasks", [])
             group_items = data.get("groups", [])
+        else:
+            _LOGGER.warning("Ignoring malformed task storage: %r", data)
+            task_items, group_items = [], []
+        if not isinstance(task_items, list):
+            _LOGGER.warning("Ignoring malformed stored task list: %r", task_items)
+            task_items = []
+        if not isinstance(group_items, list):
+            group_items = []
 
         # Fields added after a task was stored fall back to the attrs
         # defaults; unknown stored fields (e.g. written by a newer version)
@@ -243,6 +330,7 @@ class TaskStore:
                 )
             else:
                 task.active_months = []
+            _repair_loaded_task(task)
             self._tasks[task.id] = task
         # Groups in use by tasks always exist, even if the stored list lags.
         self._groups = {
@@ -441,7 +529,9 @@ class TaskStore:
 
     def add(self, task: Task, labels: list[str] | None = None) -> str:
         """Add a new task and announce it."""
-        error = get_trigger(task.trigger_type).validate(attr.asdict(task))
+        error = get_trigger(task.trigger_type).validate(
+            attr.asdict(task, filter=_without_history)
+        )
         if error is not None:
             raise RuntimeError(error)
 
@@ -476,8 +566,9 @@ class TaskStore:
 
         # Validate the post-update trigger fields before mutating anything, so
         # a task can never be switched into a state where it silently never
-        # becomes due (e.g. count trigger without an entity).
-        merged = attr.asdict(task)
+        # becomes due (e.g. count trigger without an entity). History is left
+        # out: validation never reads it, and it can be unbounded.
+        merged = attr.asdict(task, filter=_without_history)
         merged.update(
             (key, value)
             for key, value in updated.items()

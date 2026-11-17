@@ -1,6 +1,13 @@
 """Tests for integration setup, entities, watchers, and services."""
 
+from unittest.mock import AsyncMock, patch
+
+import pytest
+from homeassistant.core import Context
+from homeassistant.exceptions import ServiceValidationError, Unauthorized
+from homeassistant.helpers import entity_registry as er
 from homeassistant.util import dt as dt_util
+from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 from custom_components.tasks import TasksData
 from custom_components.tasks.const import (
@@ -8,8 +15,10 @@ from custom_components.tasks.const import (
     SERVICE_INCREMENT_COUNT,
     SERVICE_RESET,
     SERVICE_RESET_COUNT,
+    SERVICE_SEND_TASK_NOTIFICATION,
+    SERVICE_SNOOZE_TASK,
 )
-from custom_components.tasks.store import STORAGE_KEY
+from custom_components.tasks.store import STORAGE_KEY, Task
 
 from . import entity_id_for
 
@@ -496,3 +505,238 @@ async def test_tag_scan_completes_every_task_sharing_the_tag(hass, setup_entry) 
     assert data.store.tasks["tasks_tagged_b"].last_performed == today
     # A task without that tag is left alone.
     assert data.store.tasks["tasks_untagged"].last_performed == untouched
+
+
+def _add_task(hass, **overrides) -> str:
+    """Add a time-based task straight to the store and return its id."""
+    fields = {
+        "id": "tasks_svc",
+        "title": "Change Filter",
+        "interval_value": 7,
+        "interval_type": "days",
+        "last_performed": dt_util.start_of_local_day().isoformat(),
+    }
+    fields.update(overrides)
+    data: TasksData = hass.data[DOMAIN]
+    return data.store.add(Task(**fields))
+
+
+async def _setup_from_storage(hass) -> MockConfigEntry:
+    entry = MockConfigEntry(domain=DOMAIN, data={}, options={})
+    entry.add_to_hass(hass)
+    with (
+        patch("custom_components.tasks.async_register_panel", new=AsyncMock()),
+        patch("custom_components.tasks.async_unregister_panel"),
+    ):
+        assert await hass.config_entries.async_setup(entry.entry_id)
+        await hass.async_block_till_done()
+    return entry
+
+
+async def test_reset_rejects_out_of_range_date(hass, setup_entry) -> None:
+    """9999-12-31 used to overflow next_due and take every entity down."""
+    task_id = _add_task(hass)
+    await hass.async_block_till_done()
+    before = hass.data[DOMAIN].store.tasks[task_id].last_performed
+
+    for bad in ("9999-12-31", "1066-10-14", "next tuesday"):
+        with pytest.raises(ServiceValidationError, match="performed_date"):
+            await hass.services.async_call(
+                DOMAIN,
+                SERVICE_RESET,
+                {"entity_id": entity_id_for(hass, task_id), "performed_date": bad},
+                blocking=True,
+            )
+    assert hass.data[DOMAIN].store.tasks[task_id].last_performed == before
+    hass.data[DOMAIN].store.get_all()  # still renders
+
+
+@pytest.mark.parametrize(
+    "service", [SERVICE_RESET, SERVICE_SNOOZE_TASK, SERVICE_SEND_TASK_NOTIFICATION]
+)
+async def test_read_only_user_cannot_act_on_tasks(
+    hass, setup_entry, hass_read_only_user, service
+) -> None:
+    """Plain services aren't entity-permission checked by HA; ours must be."""
+    task_id = _add_task(hass)
+    await hass.async_block_till_done()
+    with pytest.raises(Unauthorized):
+        await hass.services.async_call(
+            DOMAIN,
+            service,
+            {"entity_id": entity_id_for(hass, task_id)},
+            blocking=True,
+            context=Context(user_id=hass_read_only_user.id),
+        )
+    assert hass.data[DOMAIN].store.tasks[task_id].history == []
+
+
+async def test_regular_user_can_complete_but_not_change_counts(
+    hass, setup_entry, hass_regular_user
+) -> None:
+    hass.states.async_set("input_boolean.washer", "off")
+    task_id = _add_task(
+        hass,
+        trigger_type="count",
+        count_entity_id="input_boolean.washer",
+        count_threshold=5,
+    )
+    await hass.async_block_till_done()
+    entity_id = entity_id_for(hass, task_id)
+    user = Context(user_id=hass_regular_user.id)
+
+    await hass.services.async_call(
+        DOMAIN, SERVICE_RESET, {"entity_id": entity_id}, blocking=True, context=user
+    )
+    assert len(hass.data[DOMAIN].store.tasks[task_id].history) == 1
+
+    # The websocket counterparts are admin-only; so are the services now.
+    for service in (SERVICE_INCREMENT_COUNT, SERVICE_RESET_COUNT):
+        with pytest.raises(Unauthorized):
+            await hass.services.async_call(
+                DOMAIN, service, {"entity_id": entity_id}, blocking=True, context=user
+            )
+    assert hass.data[DOMAIN].store.tasks[task_id].current_count == 0
+
+    # Automations and scripts (no user) keep working.
+    await hass.services.async_call(
+        DOMAIN, SERVICE_INCREMENT_COUNT, {"entity_id": entity_id}, blocking=True
+    )
+    assert hass.data[DOMAIN].store.tasks[task_id].current_count == 1
+
+
+@pytest.mark.parametrize(
+    "service",
+    [
+        SERVICE_RESET,
+        SERVICE_INCREMENT_COUNT,
+        SERVICE_RESET_COUNT,
+        SERVICE_SNOOZE_TASK,
+        SERVICE_SEND_TASK_NOTIFICATION,
+    ],
+)
+async def test_services_reject_non_task_entities(hass, setup_entry, service) -> None:
+    """
+    Unknown entities used to no-op silently; the integration's non-task
+    entities (todo, calendar, any-due sensor) used to raise a raw RuntimeError.
+    """
+    any_due = er.async_get(hass).async_get_entity_id(
+        "binary_sensor", DOMAIN, f"{DOMAIN}_any_task_due"
+    )
+    for entity_id in (any_due, "todo.tasks", "binary_sensor.typo"):
+        with pytest.raises(ServiceValidationError, match="is not a task"):
+            await hass.services.async_call(
+                DOMAIN, service, {"entity_id": entity_id}, blocking=True
+            )
+
+
+async def test_mixed_case_count_entity_from_service_counts(hass, setup_entry) -> None:
+    """A mixed-case id never matched the lowercase state events before."""
+    hass.states.async_set("input_boolean.washer", "off")
+    await hass.services.async_call(
+        DOMAIN,
+        "create_task",
+        {
+            "title": "Clean washer",
+            "interval_value": 1,
+            "trigger_type": "count",
+            "count_entity_id": "input_boolean.Washer",
+            "count_threshold": 2,
+        },
+        blocking=True,
+    )
+    for state in ("on", "off", "on"):
+        hass.states.async_set("input_boolean.washer", state)
+        await hass.async_block_till_done()
+    (task,) = hass.data[DOMAIN].store.tasks.values()
+    assert task.current_count == 2
+
+
+async def test_non_finite_sensor_state_is_ignored(hass, setup_entry, caplog) -> None:
+    """A "nan" reading used to become the baseline and crash the watcher."""
+    hass.states.async_set("sensor.pump_hours", "unavailable")
+    task_id = _add_task(
+        hass,
+        trigger_type="runtime",
+        runtime_entity_id="sensor.pump_hours",
+        runtime_threshold=100,
+    )
+    await hass.async_block_till_done()
+    store = hass.data[DOMAIN].store
+    assert store.tasks[task_id].runtime_baseline is None
+
+    for reading in ("nan", "inf", "1_000"):
+        hass.states.async_set("sensor.pump_hours", reading)
+        await hass.async_block_till_done()
+        assert store.tasks[task_id].runtime_baseline is None, reading
+
+    hass.states.async_set("sensor.pump_hours", "5000")
+    await hass.async_block_till_done()
+    assert store.tasks[task_id].runtime_baseline == 5000
+    assert store.get(task_id)["due"] is False
+    hass.states.async_set("sensor.pump_hours", "5150")
+    await hass.async_block_till_done()
+    assert store.get(task_id)["due"] is True
+    assert "Error while dispatching" not in caplog.text
+
+
+async def test_corrupt_stored_fields_are_repaired(hass, hass_storage, caplog) -> None:
+    """
+    Values NaN/inf persist as (null), or hand edits, used to crash entity
+    setup and the panel for every task; they are now repaired on load.
+    """
+    base = {"interval_type": "days", "last_performed": "2026-01-01T00:00:00"}
+    seed_storage(
+        hass_storage,
+        {
+            "tasks": [
+                {
+                    **base,
+                    "id": "t_runtime",
+                    "title": "Pump",
+                    "interval_value": 1,
+                    "trigger_type": "runtime",
+                    "runtime_entity_id": "Sensor.Pump",
+                    "runtime_threshold": None,
+                    "runtime_baseline": None,
+                },
+                {**base, "id": "t_huge", "title": 7, "interval_value": 10**9},
+                {**base, "id": "t_null", "title": "Null", "interval_value": None},
+                {
+                    **base,
+                    "id": "t_group",
+                    "title": "G",
+                    "interval_value": 3,
+                    "group_id": 12,
+                    "notification_time": None,
+                },
+                {
+                    **base,
+                    "id": "t_date",
+                    "title": "D",
+                    "interval_value": 3,
+                    "last_performed": "9999-12-31T00:00:00",
+                },
+            ],
+            "groups": ["Kitchen", 5],
+        },
+    )
+    await _setup_from_storage(hass)
+
+    store = hass.data[DOMAIN].store
+    tasks = store.tasks
+    assert tasks["t_runtime"].runtime_threshold == 0
+    assert tasks["t_runtime"].runtime_entity_id == "sensor.pump"
+    assert tasks["t_huge"].interval_value == 36525
+    assert tasks["t_huge"].title == "7"
+    assert tasks["t_null"].interval_value == 1
+    assert tasks["t_group"].group_id is None
+    assert tasks["t_group"].notification_time == "09:00"
+    assert store.get_groups() == ["Kitchen"]
+    assert len(store.get_all()) == 5  # the panel renders
+    for task_id in tasks:
+        assert hass.states.get(entity_id_for(hass, task_id)) is not None
+    # The out-of-range date reads as unparseable (due), not as a crash.
+    assert store.get("t_date")["due"] is True
+    assert "Repaired stored task" in caplog.text
+    assert "Error while setting up" not in caplog.text

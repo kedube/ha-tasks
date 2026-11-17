@@ -117,13 +117,16 @@ NOTIFICATION_URL_SCHEMES = ("http", "https")
 NOTIFICATION_ACTION_COMPLETE = "TASKS_COMPLETE"
 NOTIFICATION_ACTION_SNOOZE = "TASKS_SNOOZE"
 DEFAULT_SNOOZE_DAYS = 1
+# Bounded so the snooze date can't overflow datetime (which raised before).
+MAX_SNOOZE_DAYS = 3650
+DEFAULT_NOTIFICATION_TIME = "09:00"
 
 SERVICE_SNOOZE_TASK = "snooze_task"
 SERVICE_SNOOZE_TASK_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
         vol.Optional("days", default=DEFAULT_SNOOZE_DAYS): vol.All(
-            vol.Coerce(int), vol.Range(min=1)
+            vol.Coerce(int), vol.Range(min=1, max=MAX_SNOOZE_DAYS)
         ),
     }
 )

@@ -4,6 +4,38 @@ Notable changes to Tasks (formerly Home Maintenance). The Unreleased section
 is rotated into a versioned section by the release workflow and becomes the
 Highlights block of the GitHub release notes.
 
+## Unreleased
+
+- Fixed: a task given a far-future date (such as a `performed_date` of
+  9999-12-31) or a runtime threshold of `inf`/`nan` broke every task entity
+  and the panel, even after a restart. Dates must now fall between 1900 and
+  2200 and intervals can be at most 100 years. Stored tasks with bad values
+  are repaired when Tasks loads.
+- Fixed: one task with a notification target that rejects the message, such
+  as `persistent_notification.create`, stopped notifications for every task
+  after it. A slow or hung notify service could also hold up all
+  notifications; sends now time out after 30 seconds.
+- Fixed: seasonal tasks sent "overdue" notifications all off-season.
+- Fixed: a count task set up through the API with a mixed-case entity ID
+  (`input_boolean.Washer`) never counted, and a sensor reporting `nan` could
+  make a runtime task due straight away.
+- Fixed: saving the options while a notification was being sent could send
+  it twice.
+- Fixed: the calendar slowed Home Assistant down on every task change with
+  many tasks (about 0.4 seconds per change at 400 tasks), which also made
+  CSV imports slow.
+- Changed: read-only users can no longer complete, snooze, or send
+  notifications for tasks through the services or the panel's API. Other
+  users still can.
+- Changed: `tasks.increment_count` and `tasks.reset_count` are now
+  admin-only for people, matching the panel. Automations are unaffected.
+- Changed: only admins can rename tasks or edit descriptions from the
+  to-do list. Anyone can still check items off.
+- Changed: services now fail with an error when the entity isn't a task,
+  instead of doing nothing. Check automations that target deleted tasks.
+- Changed: notification times must be 24-hour `HH:MM`, and the panel's
+  count-based entity picker now offers only on/off entities.
+
 ## 2.6 — 2026-10-30
 
 - Fixed: on Home Assistant 2026.11, Tasks failed to load ("Error migrating

@@ -25,6 +25,7 @@ from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.util import dt as dt_util
 
 from . import const
+from .permissions import async_require_admin
 from .triggers import get_trigger
 
 if TYPE_CHECKING:
@@ -128,6 +129,12 @@ class TasksTodoList(TodoListEntity):
             task.description or ""
         ):
             updates["description"] = item.description
+        if updates:
+            # Editing a task is admin-only over the websocket API; this path
+            # must not be a way around that. (Checking an item off is not an
+            # edit: Home Assistant already required control permission on this
+            # entity to get here, and the card echoes unchanged text back.)
+            await async_require_admin(self.hass, self._context)
         # The todo schemas don't bound text lengths; enforce the same cap the
         # websocket API applies so this path can't bloat the storage file.
         for field, value in updates.items():

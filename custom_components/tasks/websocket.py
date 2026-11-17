@@ -6,9 +6,10 @@ sits next to its handler and registration is a single loop at the bottom.
 Mutating commands additionally carry @websocket_api.require_admin: the panel's
 admin_only option only hides the sidebar, so without this any authenticated
 user could add/update/delete tasks and groups directly over the API. The one
-exception is complete_task: every user can already complete a task through
-the todo list entity and the reset_last_performed service, and it lets
-non-admins use the panel to check tasks off when admin_only is turned off.
+exception is complete_task: every user who may control the task's entity can
+already complete it through the todo list entity and the reset_last_performed
+service, and it lets non-admins use the panel to check tasks off when
+admin_only is turned off. Read-only users lack that permission, so they can't.
 """
 
 from __future__ import annotations
@@ -30,6 +31,7 @@ from .const import (
     VERSION,
 )
 from .datetime_utils import normalize_last_performed
+from .permissions import check_entity_control, task_entity_id
 from .store import new_task_from_fields
 from .task_fields import (
     ADD_TASK_FIELDS,
@@ -218,7 +220,9 @@ def websocket_complete_task(
     hass: HomeAssistant, connection: connection.ActiveConnection, msg: dict[str, Any]
 ) -> None:
     """Mark a task as completed, optionally recording a history note."""
-    _get_store(hass).update_last_performed(msg["task_id"], note=msg.get("note"))
+    store = _get_store(hass)
+    check_entity_control(connection.user, task_entity_id(hass, msg["task_id"]))
+    store.update_last_performed(msg["task_id"], note=msg.get("note"))
     connection.send_result(msg["id"], {"success": True})
 
 
@@ -391,7 +395,8 @@ def websocket_get_config(
     )
 
 
-async def async_register_websockets(hass: HomeAssistant) -> None:
+@callback
+def async_register_websockets(hass: HomeAssistant) -> None:
     """Register every collected websocket command."""
     for handler in _COMMANDS:
         websocket_api.async_register_command(hass, handler)

@@ -19,7 +19,7 @@ from homeassistant.core import (
     SupportsResponse,
     callback,
 )
-from homeassistant.exceptions import ServiceValidationError, Unauthorized
+from homeassistant.exceptions import ServiceValidationError
 from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.dispatcher import (
@@ -31,11 +31,13 @@ from homeassistant.util import dt as dt_util
 
 from . import const
 from .config_flow import TasksConfigFlow
+from .datetime_utils import MAX_YEAR, MIN_YEAR, year_in_range
 from .notifications import NotificationManager
 from .panel import (
     async_register_panel,
     async_unregister_panel,
 )
+from .permissions import async_require_admin, async_require_entity_control
 from .repairs import RepairsManager
 from .store import TaskStore, new_task_from_fields
 from .task_fields import (
@@ -43,10 +45,12 @@ from .task_fields import (
     LABELS_VALIDATOR,
     TASK_FIELD_VALIDATORS,
 )
-from .triggers import UNAVAILABLE_STATES, get_trigger
+from .triggers import get_trigger, parse_numeric_state
 from .websocket import async_register_websockets
 
 if TYPE_CHECKING:
+    from datetime import datetime
+
     from homeassistant.config_entries import ConfigEntry
     from homeassistant.core import CALLBACK_TYPE
     from homeassistant.helpers.typing import ConfigType
@@ -147,13 +151,13 @@ async def async_setup_entry(hass: HomeAssistant, entry: TasksConfigEntry) -> boo
     await async_register_panel(hass, entry)
 
     # Websocket support
-    await async_register_websockets(hass)
+    async_register_websockets(hass)
 
     # Register custom services
     register_services(hass)
 
     # Per-task notifications
-    data.notifications = NotificationManager(hass, task_store)
+    data.notifications = NotificationManager(hass, task_store, entry)
     for unsub in data.notifications.async_setup():
         entry.async_on_unload(unsub)
 
@@ -267,22 +271,6 @@ async def async_migrate_entry(
     return True
 
 
-async def _require_admin_context(hass: HomeAssistant, call: ServiceCall) -> None:
-    """
-    Reject task-mutating service calls made by a non-admin user.
-
-    Mirrors the @require_admin gate on the websocket mutation commands.
-    Calls without a user context (automations, scripts, other integrations)
-    are allowed through — those were configured by an admin.
-    """
-    user_id = call.context.user_id
-    if user_id is None:
-        return
-    user = await hass.auth.async_get_user(user_id)
-    if user is None or not user.is_admin:
-        raise Unauthorized(context=call.context)
-
-
 def _create_task_from_service_call(hass: HomeAssistant, call: ServiceCall) -> str:
     """Build and store a new task from a create_task service call."""
     data: TasksData = hass.data[const.DOMAIN]
@@ -301,52 +289,69 @@ def _create_task_from_service_call(hass: HomeAssistant, call: ServiceCall) -> st
         raise ServiceValidationError(str(err)) from err
 
 
-def _mark_overdue_from_service_call(hass: HomeAssistant, call: ServiceCall) -> None:
-    """Force a task due from a mark_overdue service call."""
-    entity_id = call.data["entity_id"]
-    task_id = _task_id_for_entity(hass, entity_id)
-    if task_id is None:
+def _task_id_for_entity(hass: HomeAssistant, entity_id: str) -> str:
+    """
+    Resolve a task entity_id to its task id, or raise ServiceValidationError.
+
+    Only the per-task binary sensors qualify. The integration's other entities
+    (the todo list, calendar, and "any task due" sensor) share its platform
+    but are not tasks; they used to resolve to a bogus id and surface a raw
+    RuntimeError, and an unknown entity used to make the call silently do
+    nothing — a typo in an automation went unnoticed.
+    """
+    entry = er.async_get(hass).async_get(entity_id)
+    data: TasksData = hass.data[const.DOMAIN]
+    if (
+        entry is None
+        or entry.platform != const.DOMAIN
+        or entry.unique_id not in data.store.tasks
+    ):
         message = f"{entity_id} is not a task from the Tasks integration"
         raise ServiceValidationError(message)
-    data: TasksData = hass.data[const.DOMAIN]
-    try:
-        data.store.mark_overdue(task_id)
-    except RuntimeError as err:
-        raise ServiceValidationError(str(err)) from err
-
-
-def _task_id_for_entity(hass: HomeAssistant, entity_id: str) -> str | None:
-    """Resolve an entity_id to its task id via the entity registry."""
-    entry = er.async_get(hass).async_get(entity_id)
-    if entry is None or entry.platform != const.DOMAIN:
-        return None
     return entry.unique_id
+
+
+def _parse_performed_date(value: str | None) -> datetime | None:
+    """Parse a service performed_date into local midnight of that date."""
+    if value is None:
+        return None
+    parsed_date = dt_util.parse_date(value)
+    if parsed_date is None or not year_in_range(parsed_date):
+        message = (
+            f"Invalid performed_date {value!r}: expected a YYYY-MM-DD date "
+            f"between {MIN_YEAR} and {MAX_YEAR}"
+        )
+        raise ServiceValidationError(message)
+    # Midnight of the given calendar date in the *local* timezone —
+    # naive-datetime + as_local would have treated the date as UTC.
+    return dt_util.start_of_local_day(parsed_date)
 
 
 @callback
 def register_services(hass: HomeAssistant) -> None:
-    """Register the Tasks services."""
+    """
+    Register the Tasks services.
+
+    Authorization (see permissions.py): configuring a task — creating it,
+    changing its counter, forcing it overdue — is admin-only, like the
+    websocket commands; acting on it (complete, snooze, notify) needs control
+    permission on its entity, which read-only users lack.
+    """
+
+    def _store() -> TaskStore:
+        data: TasksData = hass.data[const.DOMAIN]
+        return data.store
+
+    def _notifications() -> NotificationManager | None:
+        data: TasksData = hass.data[const.DOMAIN]
+        return data.notifications
 
     async def async_srv_reset(call: ServiceCall) -> None:
         entity_id = call.data["entity_id"]
-        performed_date_str = call.data.get("performed_date")
-
-        performed_date = None
-        if performed_date_str is not None:
-            parsed_date = dt_util.parse_date(performed_date_str)
-            if parsed_date is None:
-                msg = f"Could not parse performed_date: {performed_date_str}"
-                raise ValueError(msg)
-            # Midnight of the given calendar date in the *local* timezone —
-            # naive-datetime + as_local would have treated the date as UTC.
-            performed_date = dt_util.start_of_local_day(parsed_date)
-
+        await async_require_entity_control(hass, call.context, entity_id)
+        performed_date = _parse_performed_date(call.data.get("performed_date"))
         task_id = _task_id_for_entity(hass, entity_id)
-        if task_id is None:
-            return
-
-        data: TasksData = hass.data[const.DOMAIN]
-        data.store.update_last_performed(
+        _store().update_last_performed(
             task_id, performed_date, note=call.data.get("note")
         )
 
@@ -358,11 +363,8 @@ def register_services(hass: HomeAssistant) -> None:
     )
 
     async def async_srv_increment_count(call: ServiceCall) -> None:
-        task_id = _task_id_for_entity(hass, call.data["entity_id"])
-        if task_id is None:
-            return
-        data: TasksData = hass.data[const.DOMAIN]
-        data.store.increment_count(task_id)
+        await async_require_admin(hass, call.context)
+        _store().increment_count(_task_id_for_entity(hass, call.data["entity_id"]))
 
     hass.services.async_register(
         const.DOMAIN,
@@ -372,11 +374,8 @@ def register_services(hass: HomeAssistant) -> None:
     )
 
     async def async_srv_reset_count(call: ServiceCall) -> None:
-        task_id = _task_id_for_entity(hass, call.data["entity_id"])
-        if task_id is None:
-            return
-        data: TasksData = hass.data[const.DOMAIN]
-        data.store.reset_count(task_id)
+        await async_require_admin(hass, call.context)
+        _store().reset_count(_task_id_for_entity(hass, call.data["entity_id"]))
 
     hass.services.async_register(
         const.DOMAIN,
@@ -386,12 +385,11 @@ def register_services(hass: HomeAssistant) -> None:
     )
 
     async def async_srv_snooze_task(call: ServiceCall) -> None:
-        task_id = _task_id_for_entity(hass, call.data["entity_id"])
-        if task_id is None:
-            return
-        data: TasksData = hass.data[const.DOMAIN]
-        if data.notifications:
-            data.notifications.snooze_task(task_id, call.data["days"])
+        entity_id = call.data["entity_id"]
+        await async_require_entity_control(hass, call.context, entity_id)
+        task_id = _task_id_for_entity(hass, entity_id)
+        if notifications := _notifications():
+            notifications.snooze_task(task_id, call.data["days"])
 
     hass.services.async_register(
         const.DOMAIN,
@@ -401,12 +399,11 @@ def register_services(hass: HomeAssistant) -> None:
     )
 
     async def async_srv_send_task_notification(call: ServiceCall) -> None:
-        task_id = _task_id_for_entity(hass, call.data["entity_id"])
-        if task_id is None:
-            return
-        data: TasksData = hass.data[const.DOMAIN]
-        if data.notifications:
-            await data.notifications.async_send_notification(task_id, force=True)
+        entity_id = call.data["entity_id"]
+        await async_require_entity_control(hass, call.context, entity_id)
+        task_id = _task_id_for_entity(hass, entity_id)
+        if notifications := _notifications():
+            await notifications.async_send_notification(task_id, force=True)
 
     hass.services.async_register(
         const.DOMAIN,
@@ -416,10 +413,7 @@ def register_services(hass: HomeAssistant) -> None:
     )
 
     async def async_srv_create_task(call: ServiceCall) -> ServiceResponse:
-        # Task creation over websocket is admin-only; keep the service path
-        # consistent. Calls without a user context (automations, scripts)
-        # pass — they were authored by an admin.
-        await _require_admin_context(hass, call)
+        await async_require_admin(hass, call.context)
         new_id = _create_task_from_service_call(hass, call)
         return {"task_id": new_id} if call.return_response else None
 
@@ -432,8 +426,12 @@ def register_services(hass: HomeAssistant) -> None:
     )
 
     async def async_srv_mark_overdue(call: ServiceCall) -> None:
-        await _require_admin_context(hass, call)
-        _mark_overdue_from_service_call(hass, call)
+        await async_require_admin(hass, call.context)
+        task_id = _task_id_for_entity(hass, call.data["entity_id"])
+        try:
+            _store().mark_overdue(task_id)
+        except RuntimeError as err:
+            raise ServiceValidationError(str(err)) from err
 
     hass.services.async_register(
         const.DOMAIN,
@@ -500,6 +498,9 @@ def _async_setup_watchers(hass: HomeAssistant, data: TasksData) -> None:
         entity_id = get_trigger(task.trigger_type).watched_entity(task)
         if not entity_id:
             continue
+        # State events carry lowercase ids (the tracker lowercases too), so a
+        # mixed-case key would never match and the task would never advance.
+        entity_id = entity_id.lower()
         if task.trigger_type == "count":
             count_map.setdefault(entity_id, []).append(task.id)
         elif task.trigger_type == "runtime":
@@ -533,19 +534,13 @@ def _async_setup_watchers(hass: HomeAssistant, data: TasksData) -> None:
         @callback
         def handle_runtime_event(event: Event) -> None:
             new_state = event.data.get("new_state")
-            if new_state is None or new_state.state in UNAVAILABLE_STATES:
-                return
-            try:
-                value = float(new_state.state)
-            except (ValueError, TypeError):
+            # Finite numbers only: a "nan" reading used to be captured as the
+            # baseline, reading the task due and crashing this handler after.
+            value = parse_numeric_state(new_state.state) if new_state else None
+            if value is None:
                 return
             old_state = event.data.get("old_state")
-            old_value: float | None = None
-            if old_state is not None and old_state.state not in UNAVAILABLE_STATES:
-                try:
-                    old_value = float(old_state.state)
-                except (ValueError, TypeError):
-                    old_value = None
+            old_value = parse_numeric_state(old_state.state) if old_state else None
             for task_id in runtime_map.get(event.data["entity_id"], []):
                 task = store.tasks.get(task_id)
                 if task is None:

@@ -3,7 +3,8 @@
 from datetime import timedelta
 
 import pytest
-from homeassistant.exceptions import ServiceValidationError
+from homeassistant.core import Context
+from homeassistant.exceptions import ServiceValidationError, Unauthorized
 from homeassistant.util import dt as dt_util
 
 from custom_components.tasks import TasksData
@@ -221,3 +222,37 @@ async def test_oversized_rename_rejected(hass, setup_entry) -> None:
             blocking=True,
         )
     assert data.store.tasks["tasks_todo_test"].title == "Flush Water Heater"
+
+
+async def test_non_admin_can_check_off_but_not_rename(
+    hass, setup_entry, hass_regular_user
+) -> None:
+    """Renames are edits, admin-only like tasks/update_task; checking off isn't."""
+    data: TasksData = hass.data[DOMAIN]
+    data.store.add(
+        make_task(last_performed=(dt_util.now() - timedelta(days=40)).isoformat())
+    )
+    await hass.async_block_till_done()
+    user = Context(user_id=hass_regular_user.id)
+
+    for change in ({"rename": "pwned"}, {"description": "pwned"}):
+        with pytest.raises(Unauthorized):
+            await hass.services.async_call(
+                "todo",
+                "update_item",
+                {"entity_id": TODO_ENTITY, "item": "tasks_todo_test", **change},
+                blocking=True,
+                context=user,
+            )
+    task = data.store.tasks["tasks_todo_test"]
+    assert task.title == "Flush Water Heater"
+    assert task.description is None
+
+    await hass.services.async_call(
+        "todo",
+        "update_item",
+        {"entity_id": TODO_ENTITY, "item": "tasks_todo_test", "status": "completed"},
+        blocking=True,
+        context=user,
+    )
+    assert len(task.history) == 1

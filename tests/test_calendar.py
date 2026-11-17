@@ -1,8 +1,10 @@
 """Tests for the due-date calendar."""
 
 from datetime import timedelta
+from unittest.mock import patch
 
 from dateutil.relativedelta import relativedelta
+from homeassistant.components.calendar import CalendarEvent
 from homeassistant.util import dt as dt_util
 
 from custom_components.tasks import TasksData
@@ -225,3 +227,85 @@ async def test_projected_event_uids_are_unique(hass, setup_entry) -> None:
     assert len(uids) == len(set(uids))
     # The real next due date keeps the bare task id for existing automations.
     assert uids[0] == "tasks_cal_test"
+
+
+async def test_task_change_builds_only_the_next_event(hass, setup_entry) -> None:
+    """
+    Every change used to rebuild all ~30 projected events per task just to
+    compare the next one — ~0.4 s of blocked event loop at 400 tasks.
+    """
+    data: TasksData = hass.data[DOMAIN]
+    for index in range(30):
+        data.store.add(make_task(id=f"tasks_{index}", interval_value=7))
+    await hass.async_block_till_done()
+
+    with patch(
+        "custom_components.tasks.calendar.CalendarEvent", wraps=CalendarEvent
+    ) as built:
+        data.store.add(make_task(id="tasks_new", interval_value=7))
+        await hass.async_block_till_done()
+    assert built.call_count <= 2
+
+    # A view builds events for its own window only.
+    with patch(
+        "custom_components.tasks.calendar.CalendarEvent", wraps=CalendarEvent
+    ) as built:
+        events = await get_events(hass, days_back=0, days_ahead=10)
+    assert built.call_count == len(events) == 31 * 2
+
+
+async def test_state_matches_first_projected_event(hass, setup_entry) -> None:
+    """The cheap next-event search agrees with the full projection."""
+    data: TasksData = hass.data[DOMAIN]
+    today = dt_util.start_of_local_day()
+    # An overdue task (its next event is the first repetition after today),
+    # one due later, and one due today.
+    data.store.add(
+        make_task(
+            id="tasks_a",
+            title="A",
+            interval_value=10,
+            last_performed=(today - timedelta(days=13)).isoformat(),
+        )
+    )
+    data.store.add(
+        make_task(
+            id="tasks_b",
+            title="B",
+            interval_value=30,
+            last_performed=(today - timedelta(days=25)).isoformat(),
+        )
+    )
+    await hass.async_block_till_done()
+    state = hass.states.get(CALENDAR_ENTITY)
+    first = (await get_events(hass, days_back=0, days_ahead=365))[0]
+    assert state.attributes["message"] == first["summary"] == "B"
+
+    data.store.add(
+        make_task(
+            id="tasks_c",
+            title="C",
+            interval_value=5,
+            last_performed=(today - timedelta(days=5)).isoformat(),
+        )
+    )
+    await hass.async_block_till_done()
+    assert hass.states.get(CALENDAR_ENTITY).attributes["message"] == "C"
+
+
+async def test_schedule_edit_that_keeps_next_due_refreshes_projection(
+    hass, setup_entry
+) -> None:
+    """A season change moving only later occurrences used to leave them stale."""
+    data: TasksData = hass.data[DOMAIN]
+    data.store.add(make_task(interval_value=1, interval_type="months"))
+    await hass.async_block_till_done()
+    assert len(await get_events(hass, days_back=0, days_ahead=300)) > 3
+
+    next_due = dt_util.as_local(
+        dt_util.parse_datetime(data.store.get("tasks_cal_test")["next_due"])
+    ).date()
+    data.store.update_task("tasks_cal_test", {"active_months": [next_due.month]})
+    await hass.async_block_till_done()
+    assert data.store.get("tasks_cal_test")["next_due"].startswith(str(next_due))
+    assert len(await get_events(hass, days_back=0, days_ahead=300)) == 1

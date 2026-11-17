@@ -16,7 +16,19 @@ from typing import TYPE_CHECKING
 from homeassistant.util import dt as dt_util
 
 if TYPE_CHECKING:
-    from datetime import datetime
+    from datetime import date, datetime
+
+# Dates a task can hold. Interval arithmetic on a date near datetime's own
+# limits (years 1 and 9999) raises OverflowError, and a single such task used
+# to take down every entity and the panel, so user-supplied dates are confined
+# to this range and stored ones outside it read as unparseable.
+MIN_YEAR = 1900
+MAX_YEAR = 2200
+
+
+def year_in_range(value: date) -> bool:
+    """Whether a date (or datetime) falls inside the supported year range."""
+    return MIN_YEAR <= value.year <= MAX_YEAR
 
 
 def normalize_last_performed(last_str: str | None) -> str | None:
@@ -24,12 +36,13 @@ def normalize_last_performed(last_str: str | None) -> str | None:
     Return a midnight-floored local ISO date, or None if unparseable.
 
     An empty value means "performed today". Shared by the websocket add/update
-    handlers and the create_task service so both normalize identically.
+    handlers and the create_task service so both normalize identically. A
+    date outside MIN_YEAR..MAX_YEAR counts as unparseable.
     """
     if not last_str:
         return dt_util.start_of_local_day().isoformat()
     parsed = dt_util.parse_datetime(last_str)
-    if parsed is None:
+    if parsed is None or not year_in_range(parsed):
         return None
     # Naive datetimes are taken as local time, not UTC.
     if parsed.tzinfo is None:
@@ -48,7 +61,7 @@ def default_date_task_last_performed(anchor_date: object) -> str | None:
     validation reports that).
     """
     anchor = dt_util.parse_date(str(anchor_date or "").split("T")[0])
-    if anchor is None:
+    if anchor is None or not year_in_range(anchor):
         return None
     return (anchor - timedelta(days=1)).isoformat()
 
@@ -62,11 +75,14 @@ def parse_local_datetime(value: str | None) -> datetime | None:
     local zone so that later interval arithmetic (add days/weeks/months,
     then floor to local midnight) does not carry a stale fixed offset across
     a DST boundary — which would otherwise shift the due date by a day.
+
+    A non-string or out-of-range value (corrupt or pre-validation storage)
+    reads as None rather than raising later in the interval arithmetic.
     """
-    if not value:
+    if not value or not isinstance(value, str):
         return None
     parsed = dt_util.parse_datetime(value)
-    if parsed is None:
+    if parsed is None or not year_in_range(parsed):
         return None
     if parsed.tzinfo is None:
         parsed = parsed.replace(tzinfo=dt_util.get_default_time_zone())

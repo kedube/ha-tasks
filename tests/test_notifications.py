@@ -1,7 +1,13 @@
 """Tests for per-task notifications."""
 
+import asyncio
 from datetime import timedelta
+from unittest.mock import AsyncMock, patch
 
+import pytest
+import voluptuous as vol
+from homeassistant.helpers.dispatcher import async_dispatcher_send
+from homeassistant.setup import async_setup_component
 from homeassistant.util import dt as dt_util
 from pytest_homeassistant_custom_component.common import async_mock_service
 
@@ -12,6 +18,7 @@ from custom_components.tasks.const import (
     NOTIFICATION_ACTION_SNOOZE,
     SERVICE_SEND_TASK_NOTIFICATION,
     SERVICE_SNOOZE_TASK,
+    SIGNAL_TASKS_CHANGED,
 )
 from custom_components.tasks.notifications import (
     MOBILE_APP_ACTION_EVENT,
@@ -375,3 +382,129 @@ async def test_completion_does_not_dismiss_non_mobile_target(hass, setup_entry) 
     assert len(calls) == 1
     task = data.store.tasks["tasks_notify_test"]
     assert task.last_notification_date is None
+
+
+async def test_failing_target_does_not_starve_other_tasks(hass, setup_entry) -> None:
+    """
+    One task's failure used to abort the whole pass, every minute: a target
+    rejecting the payload raises vol.Invalid (not a HomeAssistantError).
+    """
+    assert await async_setup_component(hass, "persistent_notification", {})
+    calls = async_mock_service(hass, "notify", "mobile_test")
+
+    async def broken(call) -> None:
+        raise KeyError("boom")  # an integration bug, not a HomeAssistantError
+
+    hass.services.async_register("notify", "broken", broken)
+    data: TasksData = hass.data[DOMAIN]
+
+    data.store.add(
+        make_task(
+            id="a", title="A", notification_target="persistent_notification.create"
+        )
+    )
+    data.store.add(make_task(id="c", title="C", notification_target="notify.broken"))
+    data.store.add(make_task(id="b", title="B"))
+    await hass.async_block_till_done()
+
+    assert [call.data["title"] for call in calls] == ["B"]
+    today = dt_util.now().date().isoformat()
+    # Both failures back off until tomorrow instead of retrying every minute.
+    assert data.notifications._send_failed_on == {"a": today, "c": today}
+
+
+async def test_seasonal_task_does_not_nag_out_of_season(hass, setup_entry) -> None:
+    """Out of season the entity reads not-due; notifications must agree."""
+    calls = async_mock_service(hass, "notify", "mobile_test")
+    due_day = dt_util.now().date() - timedelta(days=60)
+    data: TasksData = hass.data[DOMAIN]
+    data.store.add(
+        make_task(
+            last_performed=dt_util.start_of_local_day(
+                due_day - timedelta(days=5)
+            ).isoformat(),
+            active_months=[due_day.month],
+        )
+    )
+    await hass.async_block_till_done()
+
+    assert hass.states.get(entity_id_for(hass, "tasks_notify_test")).state == "off"
+    assert calls == []
+
+
+async def test_hung_notify_coalesces_and_times_out(hass, setup_entry, caplog) -> None:
+    """
+    A hung notify call used to hold the lock forever while every change
+    signal queued another pass behind it.
+    """
+    never = asyncio.Event()
+    attempts = 0
+
+    async def hang(call) -> None:
+        nonlocal attempts
+        attempts += 1
+        await never.wait()
+
+    hass.services.async_register("notify", "slow", hang)
+    data: TasksData = hass.data[DOMAIN]
+    manager = data.notifications
+
+    with patch("custom_components.tasks.notifications.SEND_TIMEOUT", 0.05):
+        data.store.add(make_task(notification_target="notify.slow"))
+        await asyncio.sleep(0)
+        for _ in range(200):
+            async_dispatcher_send(hass, SIGNAL_TASKS_CHANGED)
+        assert not manager._lock._waiters  # coalesced: nothing queued
+        await hass.async_block_till_done(wait_background_tasks=True)
+
+    # The coalesced re-run skips the task: its send already failed today.
+    assert attempts == 1
+    assert "TimeoutError" in caplog.text
+
+
+async def test_reload_cancels_in_flight_pass(hass, setup_entry) -> None:
+    """
+    A pass blocked on a send used to resume after a reload, write to the old
+    store (leaving a stale save pending), and duplicate the notification.
+    """
+    release = asyncio.Event()
+    delivered: list[str] = []
+
+    async def slow(call) -> None:
+        await release.wait()
+        delivered.append(call.data["title"])
+
+    hass.services.async_register("notify", "slow", slow)
+    old_store = hass.data[DOMAIN].store
+    old_store.add(make_task(notification_target="notify.slow"))
+    for _ in range(5):
+        await asyncio.sleep(0)
+
+    with (
+        patch("custom_components.tasks.async_register_panel", new=AsyncMock()),
+        patch("custom_components.tasks.async_unregister_panel"),
+    ):
+        await hass.config_entries.async_reload(setup_entry.entry_id)
+    release.set()
+    await hass.async_block_till_done()
+
+    new_store = hass.data[DOMAIN].store
+    assert new_store is not old_store
+    assert delivered == ["Change Filter"]  # once, by the new entry's pass
+    assert old_store.tasks["tasks_notify_test"].last_notification_date is None
+    assert old_store._store._delay_handle is None  # no stale write pending
+    assert new_store.tasks["tasks_notify_test"].last_notification_date is not None
+
+
+async def test_snooze_days_are_bounded(hass, setup_entry) -> None:
+    """A huge snooze used to overflow the date computation."""
+    data: TasksData = hass.data[DOMAIN]
+    data.store.add(make_task(notifications_enabled=False))
+    await hass.async_block_till_done()
+    with pytest.raises(vol.Invalid):
+        await hass.services.async_call(
+            DOMAIN,
+            SERVICE_SNOOZE_TASK,
+            {"entity_id": entity_id_for(hass, "tasks_notify_test"), "days": 10**7},
+            blocking=True,
+        )

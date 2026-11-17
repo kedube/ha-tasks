@@ -9,13 +9,14 @@ the websocket API share a single implementation.
 
 from __future__ import annotations
 
+import math
 from datetime import date, timedelta
 from typing import TYPE_CHECKING, Any
 
 from dateutil.relativedelta import relativedelta
 from homeassistant.util import dt as dt_util
 
-from .datetime_utils import parse_local_datetime
+from .datetime_utils import parse_local_datetime, year_in_range
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Mapping
@@ -31,6 +32,48 @@ UNAVAILABLE_STATES = ("unknown", "unavailable")
 # skipped past repetitions of a badly overdue task (~13 years of a daily
 # task) without letting a corrupt interval spin forever.
 _MAX_PROJECTION_STEPS = 5000
+
+# Longest allowed interval per unit (100 years). Together with the year range
+# in datetime_utils this keeps every due-date computation inside datetime's
+# limits, so no task can raise OverflowError in the entities or the panel.
+MAX_INTERVAL_YEARS = 100
+MAX_INTERVAL_VALUES = {
+    "days": 36525,
+    "weeks": 5218,
+    "months": 12 * MAX_INTERVAL_YEARS,
+    "years": MAX_INTERVAL_YEARS,
+}
+
+
+def max_interval_value(interval_type: str | None) -> int:
+    """Return the largest interval_value allowed for an interval unit."""
+    return MAX_INTERVAL_VALUES.get(interval_type or "days", MAX_INTERVAL_VALUES["days"])
+
+
+def _validate_interval_length(fields: Mapping[str, Any]) -> str | None:
+    """Return an error when the interval exceeds MAX_INTERVAL_YEARS."""
+    value = fields.get("interval_value") or 0
+    if value > max_interval_value(fields.get("interval_type")):
+        return f"the interval cannot exceed {MAX_INTERVAL_YEARS} years"
+    return None
+
+
+def parse_numeric_state(value: str | None) -> float | None:
+    """
+    Parse an entity state as a finite number, or None.
+
+    float() also accepts "nan", "inf", and digit-group underscores ("1_000");
+    a sensor reporting those must read as unavailable, not as a value — a NaN
+    baseline would turn the sensor's lifetime total into runtime and crash
+    the runtime watcher on every later update.
+    """
+    if value is None or value in UNAVAILABLE_STATES or "_" in value:
+        return None
+    try:
+        number = float(value)
+    except (TypeError, ValueError):
+        return None
+    return number if math.isfinite(number) else None
 
 
 class _Unset:
@@ -89,7 +132,8 @@ def _parse_anchor(value: str | None) -> date | None:
     """Parse a stored anchor into a calendar date, tolerating datetimes."""
     if not value:
         return None
-    return dt_util.parse_date(str(value).split("T")[0])
+    anchor = dt_util.parse_date(str(value).split("T")[0])
+    return anchor if anchor is not None and year_in_range(anchor) else None
 
 
 def _project_future(
@@ -159,8 +203,8 @@ class TimeTrigger:
         return None
 
     def validate(self, fields: Mapping[str, Any]) -> str | None:
-        """Return an error message when required trigger fields are missing."""
-        return None
+        """Return an error message when trigger fields are missing or invalid."""
+        return _validate_interval_length(fields)
 
     def initialize(self, hass: HomeAssistant, task: Task) -> None:
         """Set up trigger-specific state when a task is created or retyped."""
@@ -345,7 +389,7 @@ class DateTrigger(TimeTrigger):
             return "date tasks require a valid anchor_date"
         if (fields.get("interval_value") or 0) <= 0:
             return "date tasks require a positive interval_value"
-        return None
+        return _validate_interval_length(fields)
 
     def _anchor(self, task: Task) -> date | None:
         """Return the anchor as a calendar date, or None when unparseable."""
@@ -523,12 +567,7 @@ class RuntimeTrigger(TimeTrigger):
         if not task.runtime_entity_id:
             return None
         state = hass.states.get(task.runtime_entity_id)
-        if state is None or state.state in UNAVAILABLE_STATES:
-            return None
-        try:
-            return float(state.state)
-        except (ValueError, TypeError):
-            return None
+        return parse_numeric_state(state.state) if state is not None else None
 
     def delta(self, hass: HomeAssistant, task: Task) -> float:
         """Return accumulation since baseline, tolerating external resets."""

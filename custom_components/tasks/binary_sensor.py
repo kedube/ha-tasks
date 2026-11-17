@@ -215,6 +215,10 @@ class AnyTaskDueSensor(BinarySensorEntity):
     _attr_should_poll = False
     _attr_unique_id = f"{const.DOMAIN}_any_task_due"
     _attr_icon = "mdi:clipboard-alert-outline"
+    # The title list is unbounded (one entry per due task, up to 500 chars
+    # each) and would exceed the recorder's attribute size limit; it stays in
+    # the live state for automations, just out of the history database.
+    _unrecorded_attributes = frozenset({"due_tasks"})
 
     def __init__(self, hass: HomeAssistant, store: TaskStore) -> None:
         """Initialize the aggregate sensor."""

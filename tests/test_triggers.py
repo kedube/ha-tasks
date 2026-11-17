@@ -2,10 +2,12 @@
 
 from datetime import timedelta
 
+import pytest
 from homeassistant.util import dt as dt_util
 
+from custom_components.tasks.datetime_utils import normalize_last_performed
 from custom_components.tasks.store import Task
-from custom_components.tasks.triggers import get_trigger
+from custom_components.tasks.triggers import get_trigger, parse_numeric_state
 
 
 def make_task(**overrides) -> Task:
@@ -250,3 +252,57 @@ async def test_next_transition_accepts_precomputed_due_date(hass) -> None:
     assert trigger.next_transition(hass, task, due) == trigger.next_transition(
         hass, task
     )
+
+
+@pytest.mark.parametrize(
+    ("raw", "expected"),
+    [
+        ("12.5", 12.5),
+        ("-3", -3.0),
+        ("nan", None),
+        ("inf", None),
+        ("-Infinity", None),
+        ("1_000", None),
+        ("unavailable", None),
+        ("unknown", None),
+        ("on", None),
+        (None, None),
+    ],
+)
+def test_parse_numeric_state(raw, expected) -> None:
+    assert parse_numeric_state(raw) == expected
+
+
+@pytest.mark.parametrize(
+    ("trigger_type", "interval_type", "limit"),
+    [
+        ("time", "days", 36525),
+        ("time", "weeks", 5218),
+        ("time", "months", 1200),
+        ("time", "years", 100),
+        ("date", "years", 100),
+    ],
+)
+def test_interval_capped_at_100_years(trigger_type, interval_type, limit) -> None:
+    trigger = get_trigger(trigger_type)
+    fields = {"interval_type": interval_type, "anchor_date": "2026-01-01"}
+    assert trigger.validate({**fields, "interval_value": limit}) is None
+    assert "100 years" in trigger.validate({**fields, "interval_value": limit + 1})
+
+
+def test_date_bounds() -> None:
+    """Dates near datetime's limits used to overflow the due-date math."""
+    assert normalize_last_performed("2026-03-01") is not None
+    assert normalize_last_performed("9999-12-31") is None
+    assert normalize_last_performed("0001-01-01T00:00:00+14:00") is None
+    date_trigger = get_trigger("date")
+    for anchor in ("9999-12-31", "0001-01-01"):
+        fields = {"anchor_date": anchor, "interval_value": 1, "interval_type": "days"}
+        assert date_trigger.validate(fields) is not None
+
+
+def test_out_of_range_stored_date_reads_as_unparseable() -> None:
+    task = make_task(last_performed="9999-12-31T00:00:00")
+    trigger = get_trigger("time")
+    assert trigger.next_due(None, task) is None
+    assert trigger.is_due(None, task) is True

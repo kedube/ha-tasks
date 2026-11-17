@@ -126,8 +126,8 @@ A task's trigger type decides when it comes due:
   - If you leave **Last performed** blank on a new task, an anchor date that's already passed makes the task due right away.
 - **Time-based** tasks can be **seasonal**: pick the months they're active, such as April to October for lawn care.
   - A due date that falls out of season moves to the start of the next season.
-  - The task is never flagged as due outside its months.
-- **Count-based** tasks count each time a device turns on, such as "descale the coffee machine every 60 brews". The panel shows progress as `current / target`, and the count can also be changed with a [service call](#services).
+  - The task is never flagged as due, and sends no due or overdue notifications, outside its months.
+- **Count-based** tasks count each time a device turns on, such as "descale the coffee machine every 60 brews". Pick something that switches on and off, such as a switch, light, or binary sensor; the panel only offers those. The panel shows progress as `current / target`, and the count can also be changed with a [service call](#services).
 - **Runtime-based** tasks watch a number that keeps growing, such as hours of runtime or liters used. If the sensor resets to a lower value, the task starts counting again from there.
 
 ### Task fields
@@ -260,7 +260,7 @@ A task's attributes depend on its trigger type:
 
 - Due tasks are open items and the rest show as done; dated tasks carry their next due date.
 - The to-do list card, the companion apps' to-do widgets, and voice assistants ("what's on my tasks list?") work with it out of the box.
-- Checking an item off completes the task, and renaming an item or editing its description updates the task.
+- Checking an item off completes the task. Admins can also rename an item or edit its description to update the task.
 - Tasks can't be added, deleted, or reopened from the to-do list; use the panel for that.
 
 ### Calendar
@@ -281,6 +281,14 @@ Each task keeps a history of completions, however they happen: the panel, the to
 
 ## Services
 
+Automations and scripts can call every service. People can call them from the UI or the API as follows:
+
+- **Admins** can call every service.
+- **Other users** can mark a task done, snooze it, and send its notification. Read-only users can't call these services.
+- **Admins only:** `increment_count`, `reset_count`, `create_task`, and `mark_overdue`.
+
+A call fails with an error if the entity isn't a task, for example because of a typo or because the task was deleted.
+
 ### `tasks.reset_last_performed`
 
 Marks a task done. You can backdate it with `performed_date` and add a `note` to its [history](#completion-history).
@@ -289,13 +297,13 @@ Marks a task done. You can backdate it with `performed_date` and add a `note` to
 action: tasks.reset_last_performed
 data:
   entity_id: binary_sensor.tasks_clean_gutters
-  performed_date: "2026-06-19"  # optional; defaults to today
+  performed_date: "2026-06-19"  # optional; YYYY-MM-DD, defaults to today
   note: "Hired the crew from Main St"  # optional
 ```
 
 ### `tasks.increment_count`
 
-Adds one use to a count-based task. This is useful when what you want to count isn't a single device turning on.
+Adds one use to a count-based task (admins only). This is useful when what you want to count isn't a single device turning on.
 
 ```yaml
 action: tasks.increment_count
@@ -305,7 +313,7 @@ data:
 
 ### `tasks.reset_count`
 
-Resets a count-based task to zero **without** marking it done.
+Resets a count-based task to zero **without** marking it done (admins only).
 
 ```yaml
 action: tasks.reset_count
@@ -315,7 +323,7 @@ data:
 
 ### `tasks.snooze_task`
 
-Silences a task's [notifications](#notifications) for a number of days (default 1) without completing it.
+Silences a task's [notifications](#notifications) for a number of days (default 1, up to 3650) without completing it.
 
 ```yaml
 action: tasks.snooze_task

@@ -4,7 +4,12 @@ from collections.abc import AsyncGenerator
 from unittest.mock import AsyncMock, patch
 
 import pytest
-from pytest_homeassistant_custom_component.common import MockConfigEntry
+from homeassistant.auth.const import GROUP_ID_USER
+from pytest_homeassistant_custom_component.common import (
+    CLIENT_ID,
+    MockConfigEntry,
+    MockUser,
+)
 
 from custom_components.tasks.const import DOMAIN
 
@@ -13,6 +18,27 @@ from custom_components.tasks.const import DOMAIN
 def auto_enable_custom_integrations(enable_custom_integrations: None) -> None:
     """Enable loading custom integrations in all tests."""
     return
+
+
+@pytest.fixture
+async def hass_regular_user(hass, local_auth) -> MockUser:
+    """
+    Return a regular (non-admin) user, as created in the HA user settings.
+
+    pytest-homeassistant only ships admin and read-only users; the default
+    "Users" group may control every entity but not administer.
+    """
+    group = await hass.auth.async_get_group(GROUP_ID_USER)
+    return MockUser(groups=[group]).add_to_hass(hass)
+
+
+@pytest.fixture
+async def hass_regular_access_token(hass, hass_regular_user) -> str:
+    """Return an access token for the regular (non-admin) user."""
+    refresh_token = await hass.auth.async_create_refresh_token(
+        hass_regular_user, CLIENT_ID
+    )
+    return hass.auth.async_create_access_token(refresh_token)
 
 
 @pytest.fixture

@@ -448,13 +448,13 @@ async def test_mutating_commands_require_admin(
 
 
 async def test_non_admin_can_complete_task(
-    hass, setup_entry, hass_ws_client, hass_read_only_access_token
+    hass, setup_entry, hass_ws_client, hass_regular_access_token
 ) -> None:
-    """Completing is open to every user, as it is via the todo list and services."""
+    """Completing is open to non-admins, as it is via the todo list and services."""
     admin = await hass_ws_client(hass)
     task_id = await add_task_via_ws(admin, last_performed="2020-01-01")
 
-    client = await hass_ws_client(hass, hass_read_only_access_token)
+    client = await hass_ws_client(hass, hass_regular_access_token)
     await client.send_json_auto_id(
         {"type": "tasks/complete_task", "task_id": task_id, "note": "done"}
     )
@@ -596,3 +596,114 @@ async def test_add_date_task_defaults_to_anchor_pending(
     await client.send_json_auto_id({"type": "tasks/get_task", "task_id": other_id})
     response = await client.receive_json()
     assert response["result"]["due"] is False
+
+
+async def test_read_only_user_cannot_complete_task(
+    hass, setup_entry, hass_ws_client, hass_read_only_access_token
+) -> None:
+    """Read-only users lack control permission, so completing is refused."""
+    admin = await hass_ws_client(hass)
+    task_id = await add_task_via_ws(admin, last_performed="2020-01-01")
+
+    client = await hass_ws_client(hass, hass_read_only_access_token)
+    await client.send_json_auto_id({"type": "tasks/complete_task", "task_id": task_id})
+    response = await client.receive_json()
+    assert not response["success"]
+    assert response["error"]["code"] == "unauthorized"
+    assert hass.data["tasks"].store.tasks[task_id].history == []
+
+
+async def test_add_task_rejects_out_of_range_last_performed(
+    hass, setup_entry, hass_ws_client
+) -> None:
+    """A far-future date used to overflow the due-date math for every reader."""
+    client = await hass_ws_client(hass)
+    await client.send_json_auto_id(
+        {
+            "type": "tasks/add_task",
+            "title": "Far future",
+            "interval_value": 7,
+            "interval_type": "days",
+            "last_performed": "9999-12-31",
+        }
+    )
+    response = await client.receive_json()
+    assert not response["success"]
+    assert response["error"]["code"] == "invalid_date"
+    assert hass.data["tasks"].store.tasks == {}
+
+
+async def test_add_task_rejects_interval_over_100_years(
+    hass, setup_entry, hass_ws_client
+) -> None:
+    client = await hass_ws_client(hass)
+    await client.send_json_auto_id(
+        {
+            "type": "tasks/add_task",
+            "title": "Forever",
+            "interval_value": 101,
+            "interval_type": "years",
+        }
+    )
+    response = await client.receive_json()
+    assert not response["success"]
+    assert "100 years" in response["error"]["message"]
+
+
+async def test_add_task_rejects_non_finite_runtime_threshold(
+    hass, setup_entry, hass_ws_client
+) -> None:
+    """NaN/infinity used to pass validation, persist as null, and break setup."""
+    client = await hass_ws_client(hass)
+    for threshold in ("nan", "inf", -1):
+        await client.send_json_auto_id(
+            {
+                "type": "tasks/add_task",
+                "title": "Pump",
+                "interval_value": 1,
+                "interval_type": "days",
+                "trigger_type": "runtime",
+                "runtime_entity_id": "sensor.pump_hours",
+                "runtime_threshold": threshold,
+            }
+        )
+        response = await client.receive_json()
+        assert not response["success"], threshold
+        assert response["error"]["code"] == "invalid_format"
+    assert hass.data["tasks"].store.tasks == {}
+
+
+async def test_add_task_lowercases_watched_entity(
+    hass, setup_entry, hass_ws_client
+) -> None:
+    client = await hass_ws_client(hass)
+    task_id = await add_task_via_ws(
+        client,
+        trigger_type="count",
+        count_entity_id="Input_Boolean.Washer",
+        count_threshold=3,
+    )
+    assert (
+        hass.data["tasks"].store.tasks[task_id].count_entity_id
+        == "input_boolean.washer"
+    )
+
+
+async def test_add_task_rejects_bad_title_and_notification_time(
+    hass, setup_entry, hass_ws_client
+) -> None:
+    """Null used to be stored as the title "None"; "9:00 PM" sent at 09:00."""
+    client = await hass_ws_client(hass)
+    for overrides in ({"title": None}, {"notification_time": "9:00 PM"}):
+        await client.send_json_auto_id(
+            {
+                "type": "tasks/add_task",
+                "title": "Task",
+                "interval_value": 1,
+                "interval_type": "days",
+                **overrides,
+            }
+        )
+        response = await client.receive_json()
+        assert not response["success"], overrides
+        assert response["error"]["code"] == "invalid_format"
